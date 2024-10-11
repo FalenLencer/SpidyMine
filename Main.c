@@ -44,70 +44,27 @@ int main(void)
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
 
+        int HauteurLigne = ScreenHeight * 1 / 4;
+        int TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
+        int TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+        int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+        int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
+        int offsetX = (ScreenWidth - totalWidth) / 2;
+        int startY = HauteurLigne + Espace;
+
         Vector2 PositionBoutonParametre = { ScreenWidth - TailleBouton - 10, 10 };
         Vector2 Pos1600 = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 50 };
         Vector2 PosFull = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 100 };
         Vector2 PosRevenir = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 150 };
         Vector2 PosQuitter = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 200 };
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Vector2 mousePosition = GetMousePosition();
-
-            if (!ParametreOuvert) {
-                Rectangle ParaRect = { PositionBoutonParametre.x, PositionBoutonParametre.y, TailleBouton, TailleBouton };
-                if (CheckCollisionPointRec(mousePosition, ParaRect)) {
-                    ParametreOuvert = true;  
-                }
-            } else {
-                Rectangle RetourButtonRect = { PosRevenir.x, PosRevenir.y, BoutonMenuWidth, BoutonMenuHeight };
-                if (CheckCollisionPointRec(mousePosition, RetourButtonRect)) {
-                    ParametreOuvert = false;
-                }
-                Rectangle ButtonRect1600 = { Pos1600.x, Pos1600.y, BoutonMenuWidth, BoutonMenuHeight };
-                if (CheckCollisionPointRec(mousePosition, ButtonRect1600)) {
-                    if (fullscreen) {
-                        ToggleFullscreen();
-                        fullscreen = false;
-                    }
-                    ScreenHeight = 900;
-                    ScreenWidth = 1600;
-                    SetWindowSize(ScreenWidth, ScreenHeight);
-                    ParametreOuvert = false;
-                }
-                Rectangle FullButtonRect = { PosFull.x, PosFull.y, BoutonMenuWidth, BoutonMenuHeight };
-                if (CheckCollisionPointRec(mousePosition, FullButtonRect)) {
-                    ToggleFullscreen();
-                    fullscreen = true;
-                    ScreenHeight = GetMonitorHeight(0);
-                    ScreenWidth = GetMonitorWidth(0);
-                    SetWindowSize(ScreenWidth, ScreenHeight);
-                    ParametreOuvert = false;
-                }
-
-                Rectangle QuitterButtonRect = { PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight };
-                if (CheckCollisionPointRec(mousePosition, QuitterButtonRect)) {
-                    break;
-                }
-            }
-        }
-
-        int HauteurLigne = ScreenHeight * 1 / 4;
-
-        int TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
-        int TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
-        int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
-
-        int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
-        int offsetX = (ScreenWidth - totalWidth) / 2;
-        int startY = HauteurLigne + Espace;
-
         Vector2 PosSouris=GetMousePosition();
 
-        if (IsKeyPressed(KEY_DELETE)) {
-            int randomRow = rand() % rows;
-            int randomCol = rand() % cols;
-            Grille[randomRow][randomCol].Etat = true;
-        }
+        Rectangle ParaRect = { PositionBoutonParametre.x, PositionBoutonParametre.y, TailleBouton, TailleBouton };
+        Rectangle RetourButtonRect = { PosRevenir.x, PosRevenir.y, BoutonMenuWidth, BoutonMenuHeight };
+        Rectangle ButtonRect1600 = { Pos1600.x, Pos1600.y, BoutonMenuWidth, BoutonMenuHeight };
+        Rectangle FullButtonRect = { PosFull.x, PosFull.y, BoutonMenuWidth, BoutonMenuHeight };
+        Rectangle QuitterButtonRect = { PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight };
+        
         BeginDrawing();
         
         ClearBackground(RAYWHITE);
@@ -117,10 +74,60 @@ int main(void)
         DrawText(TextFormat("X : %f Y: %f",PosSouris.x,PosSouris.y),0,0,20,BLUE);
         DrawText(TextFormat("offX : %d offY: %d",offsetX,startY),0,20,20,RED);
         DrawLine(0, HauteurLigne, ScreenWidth, HauteurLigne, RED);
+        DrawTexture(IconParametreTexture, PositionBoutonParametre.x, PositionBoutonParametre.y, WHITE);
 
         if (TailleCarre < 1) TailleCarre = 1;
-        
-        if (!ParametreOuvert){
+
+        if (ParametreOuvert) {
+            DrawRectangle((ScreenWidth - 400) / 2, (ScreenHeight - 300) / 2, 400, 300, LIGHTGRAY);
+            DrawText("Paramètre", (ScreenWidth - 400) / 2 + 150, (ScreenHeight - 300) / 2 + 20, 20, BLACK);
+            DrawRectangle(Pos1600.x, Pos1600.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
+            DrawText("1600x900", Pos1600.x + 15, Pos1600.y + 10, 20, RAYWHITE);
+            DrawRectangle(PosFull.x, PosFull.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
+            DrawText("Plein Écran", PosFull.x + 15, PosFull.y + 10, 20, RAYWHITE);
+            DrawRectangle(PosRevenir.x, PosRevenir.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
+            DrawText("Revenir", PosRevenir.x + 15, PosRevenir.y + 10, 20, RAYWHITE);
+            DrawRectangle(PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight, RED);
+            DrawText("Quitter", PosQuitter.x + 15, PosQuitter.y + 10, 20, RAYWHITE);
+
+            if (CheckMouseCollisionCliked(PosSouris,RetourButtonRect)) {
+                ParametreOuvert = false;
+            }
+            if (CheckMouseCollisionCliked(PosSouris,ButtonRect1600)) {
+                if (fullscreen==true) {
+                    ToggleFullscreen();
+                    fullscreen = false;
+                }
+                ScreenHeight = 900;
+                ScreenWidth = 1600;
+                SetWindowSize(ScreenWidth, ScreenHeight);
+                ParametreOuvert = false;
+            }
+            if (CheckMouseCollisionCliked(PosSouris,FullButtonRect)) {
+                if (fullscreen==true) {
+                    ToggleFullscreen();
+                    fullscreen = false;
+                }
+                else{
+                    ToggleFullscreen();
+                    fullscreen = true;
+                    ScreenHeight = GetMonitorHeight(0);
+                    ScreenWidth = GetMonitorWidth(0);
+                    SetWindowSize(ScreenWidth, ScreenHeight);
+                }
+                
+                ParametreOuvert = false;
+            }
+            if (CheckMouseCollisionCliked(PosSouris,QuitterButtonRect)) {
+                break;
+            }
+        }
+        else if (!ParametreOuvert){
+            
+            if (CheckMouseCollisionCliked(PosSouris,ParaRect)) {
+                ParametreOuvert = true;  
+            }
+
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < cols; j++)
@@ -134,7 +141,7 @@ int main(void)
                     DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
-
+                    
                     if (CheckCollisionPointRec(PosSouris, Grille[i][j].HitBox)) {
                         DrawRectangleLinesEx(Grille[i][j].HitBox, 2, RED);
                         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -143,21 +150,11 @@ int main(void)
                     }
                 }
             }
-        }
-
-        DrawTexture(IconParametreTexture, PositionBoutonParametre.x, PositionBoutonParametre.y, WHITE);
-
-        if (ParametreOuvert) {
-            DrawRectangle((ScreenWidth - 400) / 2, (ScreenHeight - 300) / 2, 400, 300, LIGHTGRAY);
-            DrawText("Paramètre", (ScreenWidth - 400) / 2 + 150, (ScreenHeight - 300) / 2 + 20, 20, BLACK);
-            DrawRectangle(Pos1600.x, Pos1600.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-            DrawText("1600x900", Pos1600.x + 15, Pos1600.y + 10, 20, RAYWHITE);
-            DrawRectangle(PosFull.x, PosFull.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-            DrawText("Plein Écran", PosFull.x + 15, PosFull.y + 10, 20, RAYWHITE);
-            DrawRectangle(PosRevenir.x, PosRevenir.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-            DrawText("Revenir", PosRevenir.x + 15, PosRevenir.y + 10, 20, RAYWHITE);
-            DrawRectangle(PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight, RED);
-            DrawText("Quitter", PosQuitter.x + 15, PosQuitter.y + 10, 20, RAYWHITE);
+            if (IsKeyPressed(KEY_DELETE)) {
+            int randomRow = rand() % rows;
+            int randomCol = rand() % cols;
+            Grille[randomRow][randomCol].Etat = true;
+            }
         }
         EndDrawing();
     }
@@ -169,8 +166,7 @@ int main(void)
     if (yellowTexture.id > 0) UnloadTexture(yellowTexture);
     if (BackgroundTexture.id > 0)UnloadTexture(BackgroundTexture);
     if (IconParametreTexture.id > 0)UnloadTexture(IconParametreTexture);
-    
-    CloseWindow();
 
+    CloseWindow();
     return 0;
 }

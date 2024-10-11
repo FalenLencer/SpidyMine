@@ -79,3 +79,7 @@ void FreeGrid(Bloc **Grille, int rows) {
     }
     free(Grille);
 }
+
+bool CheckMouseCollisionCliked(Vector2 PosSouris,Rectangle Rect){
+    return ( (CheckCollisionPointRec(PosSouris, Rect)) && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)));
+}
