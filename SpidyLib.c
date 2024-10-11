@@ -6,6 +6,7 @@
 typedef struct Bloc
 {
    Texture2D Texture;
+   Rectangle HitBox;
    int PosX;
    int PosY;
    bool Etat;
@@ -28,7 +29,7 @@ Bloc ** NeedGrid(int rows , int cols ,Texture blueTexture,Texture yellowTexture,
 
     Bloc ** Grille=malloc(sizeof(Bloc*)*rows);
 
-    for (int p=0;p<cols;p++){
+    for (int p=0;p<rows;p++){
         Grille[p]=malloc(sizeof(Bloc)*cols);
     }
 
@@ -66,7 +67,15 @@ Bloc ** NeedGrid(int rows , int cols ,Texture blueTexture,Texture yellowTexture,
                     Grille[i][j].Texture = yellowTexture;
                 }
             }
+            Grille[i][j].HitBox = (Rectangle){0, 0, 0, 0};
         }
     }
     return Grille;
+}
+
+void FreeGrid(Bloc **Grille, int rows) {
+    for (int i = 0; i < rows; i++) {
+        free(Grille[i]);
+    }
+    free(Grille);
 }
