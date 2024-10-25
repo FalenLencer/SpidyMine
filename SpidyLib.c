@@ -2,16 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-typedef struct Bloc
-{
-   Texture2D Texture;
-   Rectangle HitBox;
-   int PosX;
-   int PosY;
-   bool Etat;
-   int Type;
-}Bloc;
+#include "SpidyLib.h"
 
 Texture2D LoadTextureIfExists(const char *imagePath) {
     if (strlen(imagePath) > 0 && FileExists(imagePath)) {
@@ -83,3 +74,31 @@ void FreeGrid(Bloc **Grille, int rows) {
 bool CheckMouseCollisionCliked(Vector2 PosSouris,Rectangle Rect){
     return ( (CheckCollisionPointRec(PosSouris, Rect)) && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)));
 }
+
+/*bool CheckCollisionWithGrid(Vector2 position, Texture2D playerTexture, Bloc **grille, int rows, int cols, int TailleCarre, int offsetX, int startY, int Espace) {
+    // Calculer le centre du joueur (bas du joueur pour la collision)
+    Vector2 playerCenter = {position.x + playerTexture.width / 2, position.y + playerTexture.height};
+
+    // Parcourir la grille et vérifier les collisions avec les blocs non traversables
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (VerifEtat(grille[i][j])) { // Si le bloc est activé ou déjà détruit, passer.
+                continue;
+            }
+
+            // Calculer la position de chaque bloc
+            int x = offsetX + j * (TailleCarre + Espace);
+            int y = startY + i * (TailleCarre + Espace);
+
+            // Créer une hitbox pour chaque bloc
+            Rectangle blocHitbox = {x, y, TailleCarre, TailleCarre};
+
+            // Vérifier la collision entre le centre du joueur et la hitbox du bloc
+            if (CheckCollisionPointRec(playerCenter, blocHitbox)) {
+                return true; // Collision détectée
+            }
+        }
+    }
+    return false; // Pas de collision
+}
+*/

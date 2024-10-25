@@ -5,34 +5,6 @@
 #include <stdio.h>
 #include "SpidyLib.h"
 
-bool CheckCollisionWithGrid(Vector2 position, Texture2D playerTexture, Bloc **grille, int rows, int cols, int TailleCarre, int offsetX, int startY, int Espace) {
-    // Calculer le centre du joueur (bas du joueur pour la collision)
-    Vector2 playerCenter = {position.x + playerTexture.width / 2, position.y + playerTexture.height};
-
-    // Parcourir la grille et vérifier les collisions avec les blocs non traversables
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (VerifEtat(grille[i][j])) { // Si le bloc est activé ou déjà détruit, passer.
-                continue;
-            }
-
-            // Calculer la position de chaque bloc
-            int x = offsetX + j * (TailleCarre + Espace);
-            int y = startY + i * (TailleCarre + Espace);
-
-            // Créer une hitbox pour chaque bloc
-            Rectangle blocHitbox = {x, y, TailleCarre, TailleCarre};
-
-            // Vérifier la collision entre le centre du joueur et la hitbox du bloc
-            if (CheckCollisionPointRec(playerCenter, blocHitbox)) {
-                return true; // Collision détectée
-            }
-        }
-    }
-    return false; // Pas de collision
-}
-
-
 int main(void)
 {
     const int initialScreenWidth = 1600;
@@ -116,53 +88,52 @@ int main(void)
         isAction = false;
         isMovingBas = false;
         isMovingHaut = false;
-
-        if (IsKeyDown(KEY_RIGHT)){
-        Vector2 newPosition = playerPosition;
-        newPosition.x += 5;
-            if (newPosition.x <= ScreenWidth - playerTextureIdle.width ) {
-                playerPosition.x += 5;
-                isMovingRight = true;
-            }
-        }
-
-        if (IsKeyDown(KEY_LEFT)){
-            Vector2 newPosition = playerPosition;
-            newPosition.x -= 5;
-            if (newPosition.x >= 0 ) {
-                playerPosition.x -= 5;
-                isMovingLeft = true;
-            }
-        }
-
-        if (IsKeyDown(KEY_UP)){
-            Vector2 newPosition = playerPosition;
-            newPosition.y -= 5;
-            if (newPosition.y >= 0 ) {
-                playerPosition.y -= 5;
-                isMovingHaut = true;
-            }
-        }
-
-        if (IsKeyDown(KEY_DOWN)){
-            Vector2 newPosition = playerPosition;
-            newPosition.y += 5;
-            if (newPosition.y + playerTextureIdle.height <= ScreenHeight ) {
-                playerPosition.y += 5;
-                isMovingBas = true;
-            }
-        }
-
+        
         if (IsKeyDown(KEY_SPACE)){
             isAction = true;
+        }
+        else{
+            if (IsKeyDown(KEY_RIGHT)){
+            Vector2 newPosition = playerPosition;
+            newPosition.x += 5;
+                if (newPosition.x <= ScreenWidth - playerTextureIdle.width ) {
+                    playerPosition.x += 5;
+                    isMovingRight = true;
+                }
+            }
+
+            if (IsKeyDown(KEY_LEFT)){
+                Vector2 newPosition = playerPosition;
+                newPosition.x -= 5;
+                if (newPosition.x >= 0 ) {
+                    playerPosition.x -= 5;
+                    isMovingLeft = true;
+                }
+            }
+
+            if (IsKeyDown(KEY_UP)){
+                Vector2 newPosition = playerPosition;
+                newPosition.y -= 5;
+                if (newPosition.y >= 0 ) {
+                    playerPosition.y -= 5;
+                    isMovingHaut = true;
+                }
+            }
+
+            if (IsKeyDown(KEY_DOWN)){
+                Vector2 newPosition = playerPosition;
+                newPosition.y += 5;
+                if (newPosition.y + playerTextureIdle.height <= ScreenHeight ) {
+                    playerPosition.y += 5;
+                    isMovingBas = true;
+                }
+            }
         }
         frameCounter++;
 
         BeginDrawing();
         
         ClearBackground(LIGHTGRAY);
-        //DrawTexture(BackgroundTexture, 0, 0, WHITE);
-        //DrawTexturePro(BackgroundTexture, (Rectangle){ 0, 0, BackgroundTexture.width, BackgroundTexture.height }, (Rectangle){ 0, 0, (float)ScreenWidth, (float)ScreenHeight }, (Vector2){ 0, 0 }, 0.0f, WHITE);
 
         DrawText(TextFormat("X : %f Y: %f",PosSouris.x,PosSouris.y),0,0,20,BLUE);
         DrawText(TextFormat("offX : %d offY: %d",offsetX,startY),0,20,20,RED);
@@ -234,7 +205,7 @@ int main(void)
                     DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
-                    
+
                     if (CheckCollisionPointRec(PosSouris, Grille[i][j].HitBox)) {
                         DrawRectangleLinesEx(Grille[i][j].HitBox, 2, RED);
                         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -247,6 +218,7 @@ int main(void)
                             Grille[i][j].Etat=true;
                         }
                     }
+                    
                 }
             }
             if (IsKeyPressed(KEY_DELETE)) {
