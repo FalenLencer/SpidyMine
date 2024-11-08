@@ -24,6 +24,7 @@ int main(void)
     InitTextures(&textures);
 
     Vector2 playerPosition = {(initialScreenWidth / 2) - 60, (initialScreenHeight / 4) - 120 };
+    float echelle = 0.7 ;
 
     int prevScreenWidth = initialScreenWidth;
     int prevScreenHeight = initialScreenHeight;
@@ -123,12 +124,12 @@ int main(void)
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
 
-                    SuprCliked( PosSouris , &Grille[i][j]);
+                    DetecterCollision( (Rectangle) {playerPosition.x,playerPosition.y,(textures.playerTextureIdle.width)*echelle,(textures.playerTextureIdle.height)*echelle}, &Grille[i][j]);
 
-                    ActionMiner( isAction , textures ,  playerPosition ,  &Grille[i][j]);
+                    SuprCliked( PosSouris , &Grille[i][j]);
                 }
             }
-            DrawMouvements( isMovingRight, isMovingLeft , isMovingBas, isMovingHaut,  frameCounter, playerPosition , textures);
+            DrawMouvements( isAction,isMovingRight, isMovingLeft , isMovingBas, isMovingHaut,  frameCounter, playerPosition , textures, echelle);
         }
         EndDrawing();
     }

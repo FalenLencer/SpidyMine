@@ -118,9 +118,9 @@ void ChekCollisionParametre(Vector2 PosSouris, Rectangle RetourButtonRect, Recta
 }
 
 void InitTextures(TexturesJeux *textures) {
-    (*textures).blueTexture = LoadTextureIfExists("Nut.png");
-    (*textures).redTexture = LoadTextureIfExists("Minerai1.png");
-    (*textures).yellowTexture = LoadTextureIfExists("Evenement.png");
+    (*textures).blueTexture = LoadTextureIfExists("Texture_Blocs/Nut.png");
+    (*textures).redTexture = LoadTextureIfExists("Texture_Blocs/Minerai1.png");
+    (*textures).yellowTexture = LoadTextureIfExists("Texture_Blocs/Evenement.png");
     (*textures).iconParametreTexture = LoadTextureIfExists("parametre.png");
     (*textures).backgroundTexture = LoadTextureIfExists("background.png");
     (*textures).playerTextureIdle = LoadTextureIfExists("Mouvement_Perso/neutre.png");
@@ -186,38 +186,33 @@ void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction,
     }
 }
 
-void DrawMouvements(bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures){
+void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle){
+    if (isAction) {
+        DrawTextureEx(textures.playerTextureAction, playerPosition,0.0,echelle, WHITE);
+        return;
+    }
     if (isMovingRight) {
         if ((frameCounter / 15) % 2 == 0) {
-            DrawTexture(textures.playerTextureMove, playerPosition.x, playerPosition.y, WHITE);
+            DrawTextureEx(textures.playerTextureMove, playerPosition, 0.0, echelle, WHITE);
         } else {
-            DrawTexture(textures.playerTextureMoveD, playerPosition.x, playerPosition.y, WHITE);
+            DrawTextureEx(textures.playerTextureMoveD, playerPosition, 0.0, echelle, WHITE);
         }
     }
     else if (isMovingLeft) {
         if ((frameCounter / 15) % 2 == 0) {
-            DrawTexture(textures.playerTextureMove2, playerPosition.x, playerPosition.y, WHITE);
+            DrawTextureEx(textures.playerTextureMove2, playerPosition, 0.0, echelle, WHITE);
         } else {
-            DrawTexture(textures.playerTextureMove2g, playerPosition.x, playerPosition.y, WHITE);
+            DrawTextureEx(textures.playerTextureMove2g, playerPosition, 0.0, echelle, WHITE);
         } 
     }
     else if (isMovingBas) {
-        DrawTexture(textures.playerTextureIdle, playerPosition.x, playerPosition.y, WHITE);
+        DrawTextureEx(textures.playerTextureIdle, playerPosition, 0.0, echelle, WHITE);
     }
     else if (isMovingHaut) {
-        DrawTexture(textures.playerTextureHaut, playerPosition.x, playerPosition.y, WHITE);
+        DrawTextureEx(textures.playerTextureHaut, playerPosition, 0.0, echelle, WHITE);
     }
     else {
-        DrawTexture(textures.playerTextureIdle, playerPosition.x, playerPosition.y, WHITE);
-    }
-}
-
-void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition , Bloc *cube){
-    if (isAction) {
-        DrawTexture(textures.playerTextureAction, playerPosition.x, playerPosition.y, WHITE);
-        if (CheckCollisionPointRec((Vector2) {playerPosition.x + (textures.playerTextureIdle.width) / 2, playerPosition.y + textures.playerTextureIdle.height}, (*cube).HitBox)) {
-            (*cube).Etat = true;
-        }
+        DrawTextureEx(textures.playerTextureIdle, playerPosition, 0.0, echelle, WHITE);
     }
 }
 
@@ -232,5 +227,12 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube){
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert){
     if (CheckMouseCollisionCliked(PosSouris, ParaRect)) {
         *ParametreOuvert = true;  
+    }
+}
+
+void DetecterCollision(Rectangle Personage, Bloc *Cube){
+    DrawRectangleLines(Personage.x,Personage.y,Personage.width,Personage.height,ORANGE);
+    if(CheckCollisionRecs((*Cube).HitBox,Personage)){
+        DrawRectangleLinesEx((*Cube).HitBox, 2, BLUE);
     }
 }

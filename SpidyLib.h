@@ -40,7 +40,8 @@ void InitTextures(TexturesJeux *textures);
 void UnloadTextures(TexturesJeux *textures);
 
 void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures);
-void DrawMouvements(bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures);
-void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition , Bloc *cube);
+void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle);
+void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition );
 void SuprCliked(Vector2 PosSouris , Bloc *cube);
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert);
+void DetecterCollision(Rectangle Personage, Bloc *Cube);
