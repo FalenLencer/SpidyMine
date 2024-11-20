@@ -1,0 +1,1 @@
+Ce jeux deviendra une sorte de minecraft 2D , et sera fait avec raylib uniquement.
