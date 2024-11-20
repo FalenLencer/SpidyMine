@@ -6,11 +6,14 @@ LIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 all: game
 
-game: Main.c SpidyLib.o
-	$(CC) -o game Main.c SpidyLib.o $(LIBS) $(CFLAGS)
+game: Main.c SpidyLib.o CalculLib.o
+	$(CC) -o game Main.c SpidyLib.o CalculLib.o $(LIBS) $(CFLAGS)
 
 SpidyLib.o: SpidyLib.c SpidyLib.h
 	$(CC) -c SpidyLib.c $(CFLAGS)
+
+CalculLib.o: CalculLib.c CalculLib.h
+	$(CC) -c CalculLib.c $(CFLAGS)
 
 clean:
 	rm -f *.o game

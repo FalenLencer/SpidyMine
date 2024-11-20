@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "SpidyLib.h"
+#include "CalculLib.h"
 
 int main(void)
 {
@@ -16,10 +17,21 @@ int main(void)
     srand(time(NULL));
     SetTargetFPS(60);
 
-    const int cols = 30;
-    const int rows = 20;
+    const int cols = 15;
+    const int rows = 10;
     const int Espace = 0;
 
+    int HauteurLigne = initialScreenHeight * 1 / 4;
+    int TailleCarreWidth = (initialScreenWidth - (cols - 1) * Espace) / cols;
+    int TailleCarreHeight = (initialScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+    int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+
+    int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
+    int availableSpace = initialScreenWidth - totalWidth;
+    int availableSpacePerSide = availableSpace / 2;
+    int additionalCols = availableSpacePerSide / (TailleCarre + Espace);
+
+    
     Inventaire inventaire;
     InitInventaire(&inventaire);
 
@@ -27,13 +39,16 @@ int main(void)
     InitTextures(&textures);
 
     Vector2 playerPosition = {(initialScreenWidth / 2) - 60, (initialScreenHeight / 4) - 120 };
-    float echelle = 0.7 ;
+    
+    float echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
+
 
     int prevScreenWidth = initialScreenWidth;
     int prevScreenHeight = initialScreenHeight;
 
     int TailleBouton = 80;
     bool ParametreOuvert = false;
+    bool InventaireOuvert = false ;
     int BoutonMenuWidth = 150;
     int BoutonMenuHeight = 40;
     bool fullscreen = false;
@@ -46,7 +61,17 @@ int main(void)
 
     int frameCounter = 0;
 
-    Bloc **Grille = NeedGrid(rows, cols, textures.Minerai_commun, textures.Minerai_rare, textures.evenement);
+    #define NUM_MINERAIS 3
+    Texture2D listeMinerais[NUM_MINERAIS] = {
+    textures.Minerai_commun,
+    textures.Minerai_rare,
+    textures.Minerai_epique
+    };
+
+    TypeMinerai types[NUM_MINERAIS] = {COMMUN, RARE, EPIQUE};
+
+
+    Bloc **Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable,textures.evenement, types,NUM_MINERAIS);
 
     int Speed = 2;
 
@@ -54,24 +79,35 @@ int main(void)
 
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
-
-       if (ScreenWidth != prevScreenWidth || ScreenHeight != prevScreenHeight) {
-        float playerXPercent = (playerPosition).x / (float)(prevScreenWidth);
-        float playerYPercent = (playerPosition).y / (float)(prevScreenHeight);
-
-        (playerPosition).x = playerXPercent * ScreenWidth;
-        (playerPosition).y = playerYPercent * ScreenHeight;
-
-        (prevScreenWidth) = ScreenWidth;
-        (prevScreenHeight) = ScreenHeight;
-        }
         
-        int HauteurLigne = ScreenHeight * 1 / 4;
-        int TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
-        int TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
-        int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
-        int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
-        int offsetX = (ScreenWidth - totalWidth) / 2;
+        if (ScreenWidth * 9 != ScreenHeight * 16) {
+            if (ScreenWidth > ScreenHeight * 16 / 9) {
+                ScreenWidth = ScreenHeight * 16 / 9;
+            } else {
+                ScreenHeight = ScreenWidth * 9 / 16;
+            }
+            SetWindowSize(ScreenWidth, ScreenHeight);
+        }
+
+        if (prevScreenHeight != ScreenHeight || prevScreenWidth != ScreenWidth){
+            float widthScale = (float)ScreenWidth / prevScreenWidth;
+            float heightScale = (float)ScreenHeight / prevScreenHeight;
+
+            playerPosition.x *= widthScale;
+            playerPosition.y *= heightScale;
+            
+            echelle *= heightScale;
+            
+            prevScreenHeight = ScreenHeight;
+            prevScreenWidth = ScreenWidth;
+        }
+
+        HauteurLigne = ScreenHeight * 1 / 4;
+        TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
+        TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+        TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+
+        int startX= (ScreenWidth-((cols+2*additionalCols)*TailleCarre))/2;
         int startY = HauteurLigne + Espace;
 
         Vector2 PositionBoutonParametre = { ScreenWidth - TailleBouton - 10, 10 };
@@ -93,7 +129,7 @@ int main(void)
         isMovingBas = false;
         isMovingHaut = false;
 
-        GetMouvements(Speed, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, echelle);
+        GetMouvements(Speed, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, additionalCols, echelle);
 
         frameCounter++;
 
@@ -101,40 +137,41 @@ int main(void)
         
         ClearBackground(LIGHTGRAY);
 
-        DrawLine(0, HauteurLigne, ScreenWidth, HauteurLigne, RED);
-        DrawTexture(textures.iconParametreTexture, PositionBoutonParametre.x, PositionBoutonParametre.y, WHITE);
+        DrawTextureEx(textures.iconParametreTexture, PositionBoutonParametre,0.0,echelle, WHITE);
 
         if (TailleCarre < 1) TailleCarre = 1;
-
+        
+        
         if (ParametreOuvert) {
-            
             DrawParametre(ScreenWidth, ScreenHeight, Pos1600, PosFull, PosRevenir, PosQuitter, BoutonMenuWidth, BoutonMenuHeight);
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
-        }
-        else if (!ParametreOuvert) {
-            DrawLimite( rows,  cols ,  offsetX ,  startY ,  TailleCarre ,  Espace ,  ScreenWidth ,  textures );
-            CheckOuvertureParametre(  PosSouris,  ParaRect , &ParametreOuvert);
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
+        } 
+        else if (InventaireOuvert){
+            DrawcompleteInventory(textures,&inventaire,&InventaireOuvert);
+            CheckOuvertureInventaire(&InventaireOuvert);
+            CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
+        }else {
+            CheckOuvertureInventaire(&InventaireOuvert);
+            CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols + 2 * additionalCols; j++) {
                     if (VerifEtat(Grille[i][j])) {
                         continue;
                     }
-                    int x = offsetX + j * (TailleCarre + Espace);
+                    int x = startX + j * (TailleCarre + Espace);
                     int y = startY + i * (TailleCarre + Espace);
 
                     DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
 
-                    DetecterCollision( (Rectangle) {playerPosition.x,playerPosition.y,(textures.playerTextureIdle.width)*echelle,(textures.playerTextureIdle.height)*echelle}, &Grille[i][j]);
+                    DetecterCollision((Rectangle) {playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle}, &Grille[i][j]);
 
-                    SuprCliked( PosSouris , &Grille[i][j],&inventaire);
+                    SuprCliked(PosSouris, &Grille[i][j], &inventaire);
                 }
             }
-            DrawMouvements( isAction,isMovingRight, isMovingLeft , isMovingBas, isMovingHaut,  frameCounter, playerPosition , textures, echelle);
-            DrawInventaire(&inventaire, HauteurLigne);
+            DrawMouvements(isAction, isMovingRight, isMovingLeft, isMovingBas, isMovingHaut, frameCounter, playerPosition, textures, echelle);
+            DrawInventaireQuick(&inventaire, HauteurLigne, TailleCarre);
         }
         EndDrawing();
     }
