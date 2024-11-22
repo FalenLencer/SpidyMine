@@ -38,6 +38,9 @@ int main(void)
     TexturesJeux textures;  
     InitTextures(&textures);
 
+    Statistiques stats;
+    InitStats(&stats);
+
     Vector2 playerPosition = {(initialScreenWidth / 2) - 60, (initialScreenHeight / 4) - 120 };
     
     float echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
@@ -147,7 +150,7 @@ int main(void)
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
         } 
         else if (InventaireOuvert){
-            DrawcompleteInventory(textures,&inventaire,&InventaireOuvert);
+            DrawCompleteInventory(textures,&inventaire,&stats);
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
         }else {

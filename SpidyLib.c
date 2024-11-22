@@ -61,7 +61,7 @@ Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[],  T
                         break;
                     }
                 }
-                if (randValue>95){
+                if (randValue>=95){
                     Grille[i][j].Texture = evenement;
                     Grille[i][j].type = EVENEMENT;
                 }
@@ -138,6 +138,12 @@ void InitInventaire(Inventaire *inventaire) {
     (*inventaire).Mineraie_Niveau_01=0;
     (*inventaire).Mineraie_Niveau_02=0;
     (*inventaire).Mineraie_Niveau_03=0;
+}
+
+void InitStats(Statistiques *stats) {
+    (*stats).Fortune=0;
+    (*stats).Vitesse=0;
+    (*stats).Niveau=0;
 }
 void DrawInventaireQuick(Inventaire *inventaire, int HauteurLigne , int TailleCarre) {
     DrawText(TextFormat("Minerai commun : %d",inventaire->Mineraie_Niveau_01), 0,HauteurLigne+40+TailleCarre ,20,GREEN );
@@ -325,8 +331,21 @@ void FusionnerMinerais(Inventaire *inventaire) {
     }
 }
 
-void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *InventaireOuvert) {
+void AmeliorerFortune(Inventaire *inventaire, Statistiques *stats,int prix) {
+    if (inventaire->Mineraie_Niveau_02 >= prix) {
+        inventaire->Mineraie_Niveau_02 -= prix;
+        (*stats).Fortune+=1 ;
+        
+    }
+}
+void AmeliorerVitesseDeplacement(Inventaire *inventaire, Statistiques *stats, int prix) {
+    if (inventaire->Mineraie_Niveau_02 >= prix) {
+        inventaire->Mineraie_Niveau_02 -= prix;
+        stats->Vitesse += 1;
+    }
+}
 
+void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statistiques *stats) {
     int largeurEcran = GetScreenWidth();
     int hauteurEcran = GetScreenHeight();
 
@@ -343,10 +362,73 @@ void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *
 
     const int largeurRectangleGauche = posX - 2 * marge;
     const int hauteurRectangleGauche = hauteurEcran - 2 * marge; 
-
     DrawRectangle(marge, marge, largeurRectangleGauche, hauteurRectangleGauche, Fade(DARKBLUE, 0.8f));
     DrawRectangleLinesEx((Rectangle){marge, marge, largeurRectangleGauche, hauteurRectangleGauche}, 2, BLACK);
-    DrawText("Améliorations :",  largeurRectangleGauche/2 +marge, marge + marge, (int)(20 * echelleY), RAYWHITE);
+    DrawText("Améliorations :", (largeurRectangleGauche / 2) - MeasureText("Améliorations :", (int)(20 * echelleY)) / 2, marge + marge, (int)(20 * echelleY), RAYWHITE);
+
+    const int largeurAmelioration = largeurRectangleGauche - 2 * marge;
+    const int hauteurAmelioration = 200 * echelleY;
+    const int posXAmelioration = marge + marge;
+    const int posYAmelioration = marge + 60 * echelleY;
+
+    DrawRectangle(posXAmelioration, posYAmelioration, largeurAmelioration, hauteurAmelioration, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posXAmelioration, posYAmelioration, largeurAmelioration, hauteurAmelioration}, 2, BLACK);
+
+    DrawText("Fortune :", posXAmelioration + marge, posYAmelioration + marge, (int)(20 * echelleY), RAYWHITE);
+    DrawText("Augmente les chances des drops de minerais", posXAmelioration + marge, posYAmelioration + 50 * echelleY, (int)(18 * echelleY), YELLOW);
+
+    int prixAmelioration = 10;
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmelioration), posXAmelioration + marge, posYAmelioration + 90 * echelleY, (int)(18 * echelleY), WHITE);
+
+    int largeurBoutonAmelioration = 120 * echelleX;
+    int hauteurBoutonAmelioration = 40 * echelleY;
+    int posXBoutonAmelioration = posXAmelioration + marge;
+    int posYBoutonAmelioration = posYAmelioration + hauteurAmelioration - hauteurBoutonAmelioration - marge;
+
+    bool peutAmeliorer = inventaire->Mineraie_Niveau_02 >= prixAmelioration;
+
+    if (peutAmeliorer) {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBoutonAmelioration, hauteurBoutonAmelioration, DARKGREEN);
+        DrawText("Améliorer", posXBoutonAmelioration + 10 * echelleX, posYBoutonAmelioration + 10 * echelleY, (int)(20 * echelleY), WHITE);
+
+        if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBoutonAmelioration, hauteurBoutonAmelioration) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            AmeliorerFortune(inventaire,stats,prixAmelioration);
+        }
+    } else {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBoutonAmelioration, hauteurBoutonAmelioration, RED);
+        DrawText("Impossible", posXBoutonAmelioration + 10 * echelleX, posYBoutonAmelioration + 10 * echelleY, (int)(20 * echelleY), WHITE);
+    }
+    // Rectangle pour la Vitesse
+    const int posYAmeliorationVitesse = posYAmelioration + hauteurAmelioration + 20 * echelleY; // Décalage vertical après "Fortune"
+    DrawRectangle(posXAmelioration, posYAmeliorationVitesse, largeurAmelioration, hauteurAmelioration, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posXAmelioration, posYAmeliorationVitesse, largeurAmelioration, hauteurAmelioration}, 2, BLACK);
+
+    // Texte et contenu pour la Vitesse
+    DrawText("Vitesse :", posXAmelioration + marge, posYAmeliorationVitesse + marge, (int)(20 * echelleY), RAYWHITE);
+    DrawText("Augmente la vitesse de déplacement", posXAmelioration + marge, posYAmeliorationVitesse + 50 * echelleY, (int)(18 * echelleY), YELLOW);
+
+    int prixAmeliorationVitesse = 15; // Prix pour améliorer la vitesse
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmeliorationVitesse), posXAmelioration + marge, posYAmeliorationVitesse + 90 * echelleY, (int)(18 * echelleY), WHITE);
+
+    // Bouton cliquable pour améliorer la vitesse
+    int largeurBoutonVitesse = 120 * echelleX;
+    int hauteurBoutonVitesse = 40 * echelleY;
+    int posXBoutonVitesse = posXAmelioration + marge;
+    int posYBoutonVitesse = posYAmeliorationVitesse + hauteurAmelioration - hauteurBoutonVitesse - marge;
+
+    bool peutAmeliorerVitesse = inventaire->Mineraie_Niveau_02 >= prixAmeliorationVitesse;
+
+    if (peutAmeliorerVitesse) {
+        DrawRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBoutonVitesse, hauteurBoutonVitesse, DARKGREEN);
+        DrawText("Améliorer", posXBoutonVitesse + 10 * echelleX, posYBoutonVitesse + 10 * echelleY, (int)(20 * echelleY), WHITE);
+
+        if (IsMouseOverRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBoutonVitesse, hauteurBoutonVitesse) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            AmeliorerVitesseDeplacement(inventaire, stats, prixAmeliorationVitesse);
+        }
+    } else {
+        DrawRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBoutonVitesse, hauteurBoutonVitesse, RED);
+        DrawText("Impossible", posXBoutonVitesse + 10 * echelleX, posYBoutonVitesse + 10 * echelleY, (int)(20 * echelleY), WHITE);
+    }
 
     DrawRectangle(posX, posY, largeurFenetre, hauteurFenetre, Fade(DARKGRAY, 0.8f));
     DrawRectangleLinesEx((Rectangle){posX, posY, largeurFenetre, hauteurFenetre}, 2, BLACK);
@@ -354,7 +436,7 @@ void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *
     DrawText("Inventaire", posX + marge, posY + marge, (int)(24 * echelleY), RAYWHITE);
 
     int decalageTexteY = posY + 2 * marge + 24 * echelleY;
-    int decalageIcôneX = posX + marge;
+    int decalageIcôneX = posX + marge; 
     int decalageTexteX = decalageIcôneX + tailleIcône + marge;
 
     float facteurEchelle = (float)tailleIcône / textures.Minerai_commun.width;
@@ -370,7 +452,6 @@ void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *
     DrawTextureEx(textures.Minerai_epique, (Vector2){decalageIcôneX, decalageTexteY}, 0.0f, facteurEchelle, WHITE);
     DrawText(TextFormat("Minerai épique : %d", inventaire->Mineraie_Niveau_03), decalageTexteX, decalageTexteY + tailleIcône / 4, (int)(20 * echelleY), PURPLE);
 
-    // Rectangle Fusion
     const int largeurFusion = 300 * echelleX;
     const int hauteurFusion = 200 * echelleY;
     const int posXFusion = posX + largeurFenetre + marge;
@@ -386,22 +467,22 @@ void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *
     texteFusionY += 30 * echelleY;
     DrawText("5 x Commun + 1 x Rare", posXFusion + marge, texteFusionY, (int)(18 * echelleY), YELLOW);
 
-    int largeurBouton = 120 * echelleX;
-    int hauteurBouton = 40 * echelleY;
-    int posXBouton = posXFusion + marge;
-    int posYBouton = posYFusion + hauteurFusion - hauteurBouton - marge;
+    int largeurBoutonFusion = 120 * echelleX;
+    int hauteurBoutonFusion = 40 * echelleY;
+    int posXBoutonFusion = posXFusion + marge;
+    int posYBoutonFusion = posYFusion + hauteurFusion - hauteurBoutonFusion - marge;
 
     bool peutFusionner = inventaire->Mineraie_Niveau_01 >= 5 && inventaire->Mineraie_Niveau_02 >= 1;
 
     if (peutFusionner) {
-        DrawRectangle(posXBouton, posYBouton, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Fusionner", posXBouton + 10 * echelleX, posYBouton + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBoutonFusion, hauteurBoutonFusion, DARKGREEN);
+        DrawText("Fusionner", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
 
-        if (IsMouseOverRectangle(posXBouton, posYBouton, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsMouseOverRectangle(posXBoutonFusion, posYBoutonFusion, largeurBoutonFusion, hauteurBoutonFusion) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             FusionnerMinerais(inventaire);
         }
     } else {
-        DrawRectangle(posXBouton, posYBouton, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBouton + 10 * echelleX, posYBouton + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBoutonFusion, hauteurBoutonFusion, RED);
+        DrawText("Impossible", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
     }
 }

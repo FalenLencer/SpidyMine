@@ -28,6 +28,13 @@ typedef struct {
     int Mineraie_Niveau_03;
     int Mineraie_Niveau_04;
 } Inventaire;
+typedef struct 
+{
+    int Fortune;
+    int Vitesse;
+    int Niveau;
+}Statistiques;
+
 
 
 
@@ -68,7 +75,8 @@ void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *Param
 void DetecterCollision(Rectangle Personage, Bloc *Cube);
 bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols , int additionalCols);
 void InitInventaire(Inventaire *inventaire);
+void InitStats(Statistiques *stats);
 void DrawInventaireQuick(Inventaire *inventaire, int HauteurLigne , int TailleCarre);
 void DrawLimite(int rows, int cols, int offsetX, int startY, int TailleCarre, int Espace, int ScreenWidth, Texture2D textureIncassable);
 void CheckOuvertureInventaire(bool *InventaireOuvert);
-void DrawcompleteInventory(TexturesJeux textures, Inventaire *inventaire, bool *InventaireOuvert);
+void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statistiques *stats);
