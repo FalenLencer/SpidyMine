@@ -76,10 +76,7 @@ int main(void)
 
     Bloc **Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable,textures.evenement, types,NUM_MINERAIS);
 
-    int Speed = 2;
-
     while (!WindowShouldClose()){
-
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
         
@@ -132,7 +129,7 @@ int main(void)
         isMovingBas = false;
         isMovingHaut = false;
 
-        GetMouvements(Speed, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, additionalCols, echelle);
+        GetMouvements(stats.Vitesse, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, additionalCols, echelle);
 
         frameCounter++;
 
@@ -170,7 +167,7 @@ int main(void)
 
                     DetecterCollision((Rectangle) {playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle}, &Grille[i][j]);
 
-                    SuprCliked(PosSouris, &Grille[i][j], &inventaire);
+                    SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }
             }
             DrawMouvements(isAction, isMovingRight, isMovingLeft, isMovingBas, isMovingHaut, frameCounter, playerPosition, textures, echelle);

@@ -28,14 +28,13 @@ typedef struct {
     int Mineraie_Niveau_03;
     int Mineraie_Niveau_04;
 } Inventaire;
+
 typedef struct 
 {
     int Fortune;
     int Vitesse;
     int Niveau;
 }Statistiques;
-
-
 
 
 Texture2D LoadTextureIfExists(const char *imagePath);
@@ -70,7 +69,7 @@ void UnloadTextures(TexturesJeux *textures);
 void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc **Grille, int rows, int cols,int additionalCols , float echelle);
 void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle);
 void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition );
-void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire);
+void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire,Statistiques stats);
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert);
 void DetecterCollision(Rectangle Personage, Bloc *Cube);
 bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols , int additionalCols);
