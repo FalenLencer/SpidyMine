@@ -25,7 +25,6 @@ int main(void)
     int TailleCarreWidth = (initialScreenWidth - (cols - 1) * Espace) / cols;
     int TailleCarreHeight = (initialScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
     int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
-
     int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
     int availableSpace = initialScreenWidth - totalWidth;
     int availableSpacePerSide = availableSpace / 2;
@@ -35,7 +34,7 @@ int main(void)
     Inventaire inventaire;
     InitInventaire(&inventaire);
 
-    TexturesJeux textures;  
+    TexturesJeux textures;
     InitTextures(&textures);
 
     Statistiques stats;
@@ -49,11 +48,8 @@ int main(void)
     int prevScreenWidth = initialScreenWidth;
     int prevScreenHeight = initialScreenHeight;
 
-    int TailleBouton = 80;
     bool ParametreOuvert = false;
     bool InventaireOuvert = false ;
-    int BoutonMenuWidth = 150;
-    int BoutonMenuHeight = 40;
     bool fullscreen = false;
 
     bool isMovingRight = false;
@@ -65,6 +61,7 @@ int main(void)
     int frameCounter = 0;
 
     #define NUM_MINERAIS 3
+    
     Texture2D listeMinerais[NUM_MINERAIS] = {
     textures.Minerai_commun,
     textures.Minerai_rare,
@@ -101,20 +98,23 @@ int main(void)
             prevScreenHeight = ScreenHeight;
             prevScreenWidth = ScreenWidth;
         }
+        int TailleBouton = ProportionnelleHauteur(80, ScreenHeight);
+        int BoutonMenuWidth = ProportionnelleLargeur(150, ScreenWidth);
+        int BoutonMenuHeight = ProportionnelleHauteur(40, ScreenHeight);
 
-        HauteurLigne = ScreenHeight * 1 / 4;
-        TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
-        TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+        HauteurLigne = ProportionnelleHauteur(ScreenHeight / 4, ScreenHeight);
+        TailleCarreWidth = ProportionnelleLargeur(67, ScreenWidth);
+        TailleCarreHeight = ProportionnelleHauteur(67, ScreenHeight);
         TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
 
         int startX= (ScreenWidth-((cols+2*additionalCols)*TailleCarre))/2;
         int startY = HauteurLigne + Espace;
 
-        Vector2 PositionBoutonParametre = { ScreenWidth - TailleBouton - 10, 10 };
-        Vector2 Pos1600 = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 50 };
-        Vector2 PosFull = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 100 };
-        Vector2 PosRevenir = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 150 };
-        Vector2 PosQuitter = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 200 };
+        Vector2 PositionBoutonParametre = {ProportionnelleLargeur(1450,ScreenWidth), ProportionnelleHauteur(10, ScreenHeight)};
+        Vector2 Pos1600 = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(350,ScreenHeight)};
+        Vector2 PosFull = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(400,ScreenHeight)};
+        Vector2 PosRevenir = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(450,ScreenHeight) };
+        Vector2 PosQuitter = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(500,ScreenHeight) };
         Vector2 PosSouris = GetMousePosition();
 
         Rectangle ParaRect = { PositionBoutonParametre.x, PositionBoutonParametre.y, TailleBouton, TailleBouton };

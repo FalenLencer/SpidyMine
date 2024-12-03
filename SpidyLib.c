@@ -12,6 +12,15 @@ Texture2D LoadTextureIfExists(const char *imagePath) {
     return (Texture2D){0};
 }
 
+float ProportionnelleLargeur(float valeur, int ScreenWidth) {
+    return (valeur / 1600.0f) * ScreenWidth;
+}
+
+float ProportionnelleHauteur(float valeur, int ScreenHeight) {
+    return (valeur / 900.0f) * ScreenHeight;
+}
+
+
 int VerifEtat(Bloc B) {
     return (B.Etat == true);
 }
@@ -25,7 +34,7 @@ Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[],  T
     }
 
     int *Stat01 = GetPourcentageDecroissant(NUM_MINERAIS, 95);
-    int *Stat02 = GetPourcentagePick(NUM_MINERAIS,95);
+    int *Stat02 = GetPourcentagePick(NUM_MINERAIS, 95);
     int *Stat03 = GetPourcentageCroissant(NUM_MINERAIS, 95);
 
     for (int i = 0; i < rows; i++) {
@@ -90,16 +99,16 @@ bool CheckMouseCollisionCliked(Vector2 PosSouris, Rectangle Rect) {
 }
 
 void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 PosFull, Vector2 PosRevenir, Vector2 PosQuitter, int BoutonMenuWidth, int BoutonMenuHeight) {
-    DrawRectangle((ScreenWidth - 400) / 2, (ScreenHeight - 300) / 2, 400, 300, LIGHTGRAY);
-    DrawText("Paramètre", (ScreenWidth - 400) / 2 + 150, (ScreenHeight - 300) / 2 + 20, 20, BLACK);
+    DrawRectangle(ProportionnelleLargeur(600,ScreenWidth), ProportionnelleHauteur(300,ScreenHeight), ProportionnelleLargeur(400,ScreenWidth), ProportionnelleHauteur(300,ScreenHeight), GREEN);
+    DrawText("Paramètre", ProportionnelleLargeur(750,ScreenWidth), ProportionnelleHauteur(320,ScreenHeight), 20, BLACK);
     DrawRectangle(Pos1600.x, Pos1600.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-    DrawText("1600x900", Pos1600.x + 15, Pos1600.y + 10, 20, RAYWHITE);
+    DrawText("1600x900", Pos1600.x + ProportionnelleLargeur(15,ScreenWidth), Pos1600.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
     DrawRectangle(PosFull.x, PosFull.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-    DrawText("Plein Écran", PosFull.x + 15, PosFull.y + 10, 20, RAYWHITE);
+    DrawText("Plein Écran", PosFull.x + ProportionnelleLargeur(15,ScreenWidth), PosFull.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
     DrawRectangle(PosRevenir.x, PosRevenir.y, BoutonMenuWidth, BoutonMenuHeight, DARKGRAY);
-    DrawText("Revenir", PosRevenir.x + 15, PosRevenir.y + 10, 20, RAYWHITE);
+    DrawText("Revenir", PosRevenir.x + ProportionnelleLargeur(15,ScreenWidth), PosRevenir.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
     DrawRectangle(PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight, RED);
-    DrawText("Quitter", PosQuitter.x + 15, PosQuitter.y + 10, 20, RAYWHITE);
+    DrawText("Quitter", PosQuitter.x + ProportionnelleLargeur(15,ScreenWidth), PosQuitter.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
 }
 
 void ChekCollisionParametre(Vector2 PosSouris, Rectangle RetourButtonRect, Rectangle ButtonRect1600, Rectangle FullButtonRect, Rectangle QuitterButtonRect, bool *ParametreOuvert, bool *fullscreen, int *ScreenWidth, int *ScreenHeight) {
@@ -379,90 +388,97 @@ void AmeliorerVitesseDeplacement(Inventaire *inventaire, Statistiques *stats, in
     }
 }
 
-void HandleFusionRare(int posXFusion,int posYFusion,int echelleX , int echelleY , int marge ,int posXBoutonFusion , int posYBoutonFusion, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
-    int texteFusionY = posYBoutonFusion - 90 * echelleY;
-    DrawText("Prix Fusion RARE:", posXFusion + marge, texteFusionY, (int)(20 * echelleY), WHITE);
-    texteFusionY += 30 * echelleY;
-    DrawText("5 x Commun", posXFusion + marge, texteFusionY, (int)(18 * echelleY), YELLOW);
+void HandleFusionRare(int posXFusion,int posYFusion,int margeX , int margeY ,int posXBoutonFusion , int posYBoutonFusion,int hauteurEcran,int largeurEcran, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
+    int texteFusionY = posYBoutonFusion - ProportionnelleHauteur(90,hauteurEcran);
+    int TailleText=ProportionnelleHauteur(20,hauteurEcran);
+    DrawText("Prix Fusion RARE:", posXFusion + margeX, texteFusionY, TailleText, WHITE);
+    texteFusionY += ProportionnelleHauteur(30,hauteurEcran) ;
+    DrawText("5 x Commun", posXFusion + margeX, texteFusionY, ProportionnelleHauteur(18,hauteurEcran), YELLOW);
 
     bool peutFusionner = inventaire->Mineraie_Niveau_01 >= 5;
-
+    int ecartX=ProportionnelleLargeur(10,largeurEcran);
+    int ecartY=ProportionnelleHauteur(10,hauteurEcran);
     if (peutFusionner) {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Fusionner", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Fusionner", posXBoutonFusion +  ecartX, posYBoutonFusion + ecartY, TailleText, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             FusionnerMineraisRare(inventaire);
         }
     } else {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Impossible", posXBoutonFusion + ecartX, posYBoutonFusion+ecartY, TailleText, WHITE);
     }
 }
 
-void HandleFusionEpique(int posXFusion,int posYFusion,int echelleX , int echelleY , int marge ,int posXBoutonFusion , int posYBoutonFusion, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
+void HandleFusionEpique(int posXFusion,int posYFusion,int margeX , int margeY ,int posXBoutonFusion , int posYBoutonFusion,int hauteurEcran,int largeurEcran, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
 
-    int texteFusionY =posYBoutonFusion - 90 * echelleY;
-    DrawText("Prix Fusion EPIQUE:", posXFusion + marge, texteFusionY, (int)(20 * echelleY), WHITE);
-    texteFusionY += 30 * echelleY;
-    DrawText("15xCommun + 5xRare", posXFusion + marge, texteFusionY, (int)(18 * echelleY), YELLOW);
+    int texteFusionY =posYBoutonFusion - ProportionnelleHauteur(90,hauteurEcran);
+    int TailleText=ProportionnelleHauteur(20,hauteurEcran);
+    DrawText("Prix Fusion EPIQUE:",posXFusion + margeX, texteFusionY, TailleText, WHITE);
+    texteFusionY +=ProportionnelleHauteur(30,hauteurEcran) ;
+    DrawText("15xCommun + 5xRare", posXFusion + margeX, texteFusionY, ProportionnelleHauteur(18,hauteurEcran), YELLOW);
 
     bool peutFusionner = inventaire->Mineraie_Niveau_01 >= 15 && inventaire->Mineraie_Niveau_02 >= 5;
-
+    int ecartX=ProportionnelleLargeur(10,largeurEcran);
+    int ecartY=ProportionnelleHauteur(10,hauteurEcran);
     if (peutFusionner) {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Fusionner", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Fusionner", posXBoutonFusion +ecartX, posYBoutonFusion + ecartY, TailleText, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             FusionnerMineraisEpique(inventaire);
         }
     } else {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Impossible", posXBoutonFusion + ecartX, posYBoutonFusion + ecartY, TailleText, WHITE);
     }
 }
-void HandleFusionLegendaire(int posXFusion,int posYFusion,int echelleX , int echelleY , int marge ,int posXBoutonFusion , int posYBoutonFusion, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
+void HandleFusionLegendaire(int posXFusion,int posYFusion,int margeX , int margeY ,int posXBoutonFusion , int posYBoutonFusion,int hauteurEcran,int largeurEcran, int largeurBouton , int hauteurBouton , Inventaire *inventaire){
     
-    int texteFusionY = posYBoutonFusion - 90 * echelleY;
-    DrawText("Prix Fusion LEGENDAIRE:", posXFusion + marge, texteFusionY, (int)(20 * echelleY), WHITE);
-    texteFusionY += 30 * echelleY;
-    DrawText("100xCommun + 50xRare \n+ 25xEpique", posXFusion + marge, texteFusionY, (int)(18 * echelleY), YELLOW);
+    int texteFusionY =posYBoutonFusion - ProportionnelleHauteur(90,hauteurEcran);
+    int TailleText=ProportionnelleHauteur(20,hauteurEcran);
+    DrawText("Prix Fusion LEGENDAIRE:", posXFusion + margeX, texteFusionY, TailleText, WHITE);
+    texteFusionY += ProportionnelleHauteur(30,hauteurEcran);
+    DrawText("100xCommun + 50xRare \n+ 25xEpique", posXFusion + margeX, texteFusionY, ProportionnelleHauteur(18,hauteurEcran), YELLOW);
 
     bool peutFusionner = inventaire->Mineraie_Niveau_01 >= 100 && inventaire->Mineraie_Niveau_02 >= 50 && inventaire->Mineraie_Niveau_03>=25;
-
+    int ecartX=ProportionnelleLargeur(10,largeurEcran);
+    int ecartY=ProportionnelleHauteur(10,hauteurEcran);
     if (peutFusionner) {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Fusionner", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Fusionner", posXBoutonFusion +ecartX, posYBoutonFusion + ecartY, TailleText, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             FusionnerMineraisLegendaire(inventaire);
         }
     } else {
         DrawRectangle(posXBoutonFusion, posYBoutonFusion, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBoutonFusion + 10 * echelleX, posYBoutonFusion + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Impossible", posXBoutonFusion + ecartX, posYBoutonFusion +ecartY, TailleText, WHITE);
     }
 
 }
 
-void HandleFusion(int echelleX,int echelleY , int posX,int posY , int marge ,int largeurBouton,int hauteurBouton, int largeurFenetre,int hauteurEcran, Inventaire *inventaire){
-    const int largeurFusion = 300 * echelleX;
-    const int hauteurFusion = (hauteurEcran-posY-marge) * echelleY;
-    const int posXFusion = posX + largeurFenetre + marge;
+void HandleFusion(int posX,int posY , int margeX, int margeY ,int largeurBouton,int hauteurBouton, int hauteurFenetre,int largeurFenetre ,int hauteurEcran,int largeurEcran, Inventaire *inventaire){
+    const int largeurFusion = ProportionnelleLargeur(300,largeurEcran);
+    const int hauteurFusion = ProportionnelleHauteur(580,hauteurEcran);
+    const int posXFusion = posX + largeurFenetre + margeX;
     const int posYFusion = posY;
-
+    int TailleText=ProportionnelleHauteur(20,hauteurEcran);
+    
     DrawRectangle(posXFusion, posYFusion, largeurFusion, hauteurFusion, Fade((Color){160,140,255,0}, 0.8f));
     DrawRectangleLinesEx((Rectangle){posXFusion, posYFusion, largeurFusion, hauteurFusion}, 2, BLACK);
 
-    DrawText("Fusion de minerais", posXFusion + marge, posYFusion + marge, (int)(20 * echelleY), RAYWHITE);
+    DrawText("Fusion de minerais", posXFusion + margeX, posYFusion + margeY, TailleText, RAYWHITE);
 
-    int posXBoutonFusion = posXFusion + marge;
-    int posYBoutonFusionRare =posYFusion + hauteurFusion - hauteurBouton - marge -380*echelleY;;
-    int posYBoutonFusionEpique =posYFusion + hauteurFusion - hauteurBouton - marge-190*echelleY;; 
-    int posYBoutonFusionLegendaire = posYFusion + hauteurFusion - hauteurBouton - marge;
+    int posXBoutonFusion = posXFusion + margeX;
+    int posYBoutonFusionRare =posYFusion + hauteurFusion - hauteurBouton - margeY -ProportionnelleHauteur(380,hauteurEcran);
+    int posYBoutonFusionEpique =posYFusion + hauteurFusion - hauteurBouton - margeY-ProportionnelleHauteur(190,hauteurEcran);
+    int posYBoutonFusionLegendaire = posYFusion + hauteurFusion - hauteurBouton - margeY;
 
-    HandleFusionRare(posXFusion,posYFusion,echelleX , echelleY , marge ,posXBoutonFusion , posYBoutonFusionRare, largeurBouton , hauteurBouton , inventaire);
-    HandleFusionEpique(posXFusion, posYFusion,echelleX , echelleY , marge ,posXBoutonFusion , posYBoutonFusionEpique, largeurBouton , hauteurBouton , inventaire);
-    HandleFusionLegendaire(posXFusion,posYFusion,echelleX , echelleY , marge ,posXBoutonFusion ,  posYBoutonFusionLegendaire, largeurBouton , hauteurBouton , inventaire);
+    HandleFusionRare(posXFusion,posYFusion,margeX , margeY ,posXBoutonFusion , posYBoutonFusionRare, hauteurEcran, largeurEcran, largeurBouton , hauteurBouton , inventaire);
+    HandleFusionEpique(posXFusion,posYFusion,margeX , margeY ,posXBoutonFusion , posYBoutonFusionEpique, hauteurEcran, largeurEcran, largeurBouton , hauteurBouton , inventaire);
+    HandleFusionLegendaire(posXFusion,posYFusion,margeX , margeY ,posXBoutonFusion , posYBoutonFusionLegendaire, hauteurEcran, largeurEcran, largeurBouton , hauteurBouton , inventaire);
 
 }
 
@@ -470,106 +486,110 @@ void HandleDecraft(int posX , int posY , int hauteurFenetre , int largeurFenetre
     
 }
 
-void HandleInventory(int posX,int posY , int largeurFenetre, int hauteurFenetre ,int marge , int echelleY,int echelleX, TexturesJeux textures , Inventaire *inventaire){
-    
+void HandleInventory(int posX, int posY , int margeX,int margeY ,int hauteurEcran , int largeurEcran,int hauteurFenetre,int largeurFenetre , TexturesJeux textures , Inventaire *inventaire){
+    int TailleText=ProportionnelleHauteur(20,hauteurEcran);
     DrawRectangle(posX, posY, largeurFenetre, hauteurFenetre, Fade(DARKGRAY, 0.8f));
     DrawRectangleLinesEx((Rectangle){posX, posY, largeurFenetre, hauteurFenetre}, 2, BLACK);
 
-    DrawText("Inventaire", posX + marge, posY + marge, (int)(24 * echelleY), RAYWHITE);
+    DrawText("Inventaire", posX + margeX, posY + margeY, (int)(ProportionnelleHauteur(24,hauteurEcran)), RAYWHITE);
     
-    const int tailleIcône = 64 * echelleX;
-    int decalageTexteY = posY + 2 * marge + 24 * echelleY;
-    int decalageIcôneX = posX + marge; 
-    int decalageTexteX = decalageIcôneX + tailleIcône + marge;
+    const int tailleIcône = ProportionnelleLargeur(64,largeurEcran);
+    int decalageTexteY = posY + 2 * margeY + ProportionnelleHauteur(24,hauteurEcran);
+    int decalageIcôneX = posX + margeX; 
+    int decalageTexteX = decalageIcôneX + tailleIcône + margeX;
 
     float facteurEchelle = (float)tailleIcône / textures.Minerai_commun.width;
     DrawTextureEx(textures.Minerai_commun, (Vector2){decalageIcôneX, decalageTexteY}, 0.0f, facteurEchelle, WHITE);
-    DrawText(TextFormat("Minerai commun : %d", inventaire->Mineraie_Niveau_01), decalageTexteX, decalageTexteY + tailleIcône / 4, (int)(20 * echelleY), GREEN);
+    DrawText(TextFormat("Minerai commun : %d", inventaire->Mineraie_Niveau_01), decalageTexteX, decalageTexteY + tailleIcône / 4, TailleText, GREEN);
 
-    decalageTexteY += tailleIcône + marge;
+    decalageTexteY += tailleIcône + margeY;
     DrawTextureEx(textures.Minerai_rare, (Vector2){decalageIcôneX, decalageTexteY}, 0.0f, facteurEchelle, WHITE);
-    DrawText(TextFormat("Minerai rare : %d", inventaire->Mineraie_Niveau_02), decalageTexteX, decalageTexteY + tailleIcône / 4, (int)(20 * echelleY), BLUE);
+    DrawText(TextFormat("Minerai rare : %d", inventaire->Mineraie_Niveau_02), decalageTexteX, decalageTexteY + tailleIcône / 4,TailleText, BLUE);
 
-    decalageTexteY += tailleIcône + marge;
+    decalageTexteY += tailleIcône + margeY;
     facteurEchelle = (float)tailleIcône / textures.Minerai_epique.width;
     DrawTextureEx(textures.Minerai_epique, (Vector2){decalageIcôneX, decalageTexteY}, 0.0f, facteurEchelle, WHITE);
-    DrawText(TextFormat("Minerai épique : %d", inventaire->Mineraie_Niveau_03), decalageTexteX, decalageTexteY + tailleIcône / 4, (int)(20 * echelleY), PURPLE);
+    DrawText(TextFormat("Minerai épique : %d", inventaire->Mineraie_Niveau_03), decalageTexteX, decalageTexteY + tailleIcône / 4, TailleText, PURPLE);
 
 }
 
-void HandleFortune(int posXAmelioration, int posYAmelioration ,int marge, int largeurAmelioration , int hauteurAmelioration , int echelleX , int echelleY ,int largeurBouton,int hauteurBouton, Inventaire *inventaire, Statistiques *stats){
-    DrawRectangle(posXAmelioration, posYAmelioration, largeurAmelioration, hauteurAmelioration, Fade(DARKGRAY, 0.8f));
-    DrawRectangleLinesEx((Rectangle){posXAmelioration, posYAmelioration, largeurAmelioration, hauteurAmelioration}, 2, BLACK);
+void HandleFortune( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , Inventaire *inventaire, Statistiques *stats){
+    int dimRectX=ProportionnelleLargeur(420,largeurEcran);
+    int dimRectY=ProportionnelleHauteur(200,hauteurEcran);
+    int posRectX=ProportionnelleLargeur(40,largeurEcran);
+    int posRectY=ProportionnelleHauteur(80,hauteurEcran);
+    DrawRectangle(posRectX, posRectY, dimRectX, dimRectY, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
 
-    DrawText("Fortune :", posXAmelioration + marge, posYAmelioration + marge, (int)(20 * echelleY), RAYWHITE);
-    DrawText("Augmente les chances des drops de minerais", posXAmelioration + marge, posYAmelioration + 50 * echelleY, (int)(18 * echelleY), YELLOW);
+    DrawText("Fortune :", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
+    DrawText("Augmente les chances des drops de minerais", posRectX + margeX, ProportionnelleHauteur(130,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
 
     int prixAmelioration = 10;
-    DrawText(TextFormat("Prix : %d minerais rares", prixAmelioration), posXAmelioration + marge, posYAmelioration + 90 * echelleY, (int)(18 * echelleY), WHITE);
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmelioration), posRectX + margeX, ProportionnelleHauteur(170,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
 
-    int posXBoutonAmelioration = posXAmelioration + marge;
-    int posYBoutonAmelioration = posYAmelioration + hauteurAmelioration - hauteurBouton - marge;
+    int posXBoutonAmelioration = posRectX + margeX;
+    int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
 
     bool peutAmeliorer = inventaire->Mineraie_Niveau_02 >= prixAmelioration;
 
     if (peutAmeliorer) {
         DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Améliorer", posXBoutonAmelioration + 10 * echelleX, posYBoutonAmelioration + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Améliorer", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             AmeliorerFortune(inventaire,stats,prixAmelioration);
         }
     } else {
         DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBoutonAmelioration + 10 * echelleX, posYBoutonAmelioration + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
     }
     
 }
 
-void HandleVitesseDeplacement(int posXAmelioration, int posYAmelioration ,int marge, int largeurAmelioration , int hauteurAmelioration , int echelleX , int echelleY ,int largeurBouton,int hauteurBouton, Inventaire *inventaire, Statistiques *stats){
-    const int posYAmeliorationVitesse = posYAmelioration + hauteurAmelioration + 20 * echelleY;
-    DrawRectangle(posXAmelioration, posYAmeliorationVitesse, largeurAmelioration, hauteurAmelioration, Fade(DARKGRAY, 0.8f));
-    DrawRectangleLinesEx((Rectangle){posXAmelioration, posYAmeliorationVitesse, largeurAmelioration, hauteurAmelioration}, 2, BLACK);
+void HandleVitesseDeplacement( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , Inventaire *inventaire, Statistiques *stats){
+    int dimRectX=ProportionnelleLargeur(420,largeurEcran);
+    int dimRectY=ProportionnelleHauteur(200,hauteurEcran);
+    int posRectX=ProportionnelleLargeur(40,largeurEcran);
+    int posRectY=ProportionnelleHauteur(280,hauteurEcran)+margeY;
+    DrawRectangle(posRectX, posRectY, dimRectX, dimRectY, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
 
-    DrawText("Vitesse :", posXAmelioration + marge, posYAmeliorationVitesse + marge, (int)(20 * echelleY), RAYWHITE);
-    DrawText("Augmente la vitesse de déplacement", posXAmelioration + marge, posYAmeliorationVitesse + 50 * echelleY, (int)(18 * echelleY), YELLOW);
+    DrawText("Vitesse :", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
+    DrawText("Augmente la vitesse de déplacement", posRectX + margeX, ProportionnelleHauteur(350,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
 
     int prixAmeliorationVitesse = 15;
-    DrawText(TextFormat("Prix : %d minerais rares", prixAmeliorationVitesse), posXAmelioration + marge, posYAmeliorationVitesse + 90 * echelleY, (int)(18 * echelleY), WHITE);
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmeliorationVitesse), posRectX + margeX, ProportionnelleHauteur(390,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
 
-    int posXBoutonVitesse = posXAmelioration + marge;
-    int posYBoutonVitesse = posYAmeliorationVitesse + hauteurAmelioration - hauteurBouton - marge;
+    int posXBoutonAmelioration = posRectX + margeX;
+    int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
 
     bool peutAmeliorerVitesse = inventaire->Mineraie_Niveau_02 >= prixAmeliorationVitesse;
 
     if (peutAmeliorerVitesse) {
-        DrawRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBouton, hauteurBouton, DARKGREEN);
-        DrawText("Améliorer", posXBoutonVitesse + 10 * echelleX, posYBoutonVitesse + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, DARKGREEN);
+        DrawText("Améliorer", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
 
-        if (IsMouseOverRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             AmeliorerVitesseDeplacement(inventaire, stats, prixAmeliorationVitesse);
         }
     } else {
-        DrawRectangle(posXBoutonVitesse, posYBoutonVitesse, largeurBouton, hauteurBouton, RED);
-        DrawText("Impossible", posXBoutonVitesse + 10 * echelleX, posYBoutonVitesse + 10 * echelleY, (int)(20 * echelleY), WHITE);
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
     }
 }
+    
 
-void HandleUpgrades(int posX , int posY , int marge , int hauteurEcran , int echelleX , int echelleY ,int largeurBouton , int hauteurBouton, Inventaire *inventaire , Statistiques *stats){
-    const int largeurRectangleGauche = posX - 2 * marge;
-    const int hauteurRectangleGauche = hauteurEcran - 2 * marge; 
 
-    DrawRectangle(marge, marge, largeurRectangleGauche, hauteurRectangleGauche, Fade(DARKBLUE, 0.8f));
-    DrawRectangleLinesEx((Rectangle){marge, marge, largeurRectangleGauche, hauteurRectangleGauche}, 2, BLACK);
-    DrawText("Améliorations :", (largeurRectangleGauche / 2) - MeasureText("Améliorations :", (int)(20 * echelleY)) / 2, marge + marge, (int)(20 * echelleY), RAYWHITE);
+void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton, Inventaire *inventaire , Statistiques *stats){
+    int dimX=ProportionnelleLargeur(460,largeurEcran);
+    int dimY=ProportionnelleHauteur(860,hauteurEcran);
+    int tailleText= ProportionnelleHauteur(20,hauteurEcran);
+    DrawRectangle(margeX, margeY,dimX , dimY, Fade(DARKBLUE, 0.8f));
+    DrawRectangleLinesEx((Rectangle){margeX, margeY, dimX, dimY}, 2, BLACK);
+    DrawText("Améliorations :", (int) (margeX+(dimX/2)-(MeasureText("Améliorations :",tailleText)/2)), margeY + margeY, tailleText, RAYWHITE);
 
-    const int largeurAmelioration = largeurRectangleGauche - 2 * marge;
-    const int hauteurAmelioration = 200 * echelleY;
-    const int posXAmelioration = marge + marge;
-    const int posYAmelioration = marge + 60 * echelleY;
-
-    HandleFortune( posXAmelioration,  posYAmelioration , marge,  largeurAmelioration ,  hauteurAmelioration ,  echelleX ,  echelleY ,largeurBouton,hauteurBouton , inventaire,  stats);
-    HandleVitesseDeplacement( posXAmelioration,  posYAmelioration , marge,  largeurAmelioration ,  hauteurAmelioration ,  echelleX ,  echelleY ,largeurBouton,hauteurBouton, inventaire, stats);
+    HandleFortune(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
+    HandleVitesseDeplacement( hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
 }
 
 
@@ -577,23 +597,22 @@ void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statis
     int largeurEcran = GetScreenWidth();
     int hauteurEcran = GetScreenHeight();
 
-    float echelleX = (float)largeurEcran / 1600.0f;
-    float echelleY = (float)hauteurEcran / 900.0f;
 
-    const int marge = 20 * echelleX;
-    const int largeurFenetre = 600 * echelleX;
-    const int hauteurFenetre = 300 * echelleY;
+    const int margeX = ProportionnelleHauteur(20,hauteurEcran);
+    const int margeY = ProportionnelleLargeur(20,largeurEcran);
+
+    const int largeurFenetre = ProportionnelleLargeur(600,largeurEcran);
+    const int hauteurFenetre = ProportionnelleHauteur(300,hauteurEcran);
 
     int posX = (largeurEcran - largeurFenetre) / 2;
     int posY = (hauteurEcran - hauteurFenetre) / 2;
 
-    int largeurBouton = 120 * echelleX;
-    int hauteurBouton = 40 * echelleY;
+    int largeurBouton = ProportionnelleLargeur(120,largeurEcran);
+    int hauteurBouton = ProportionnelleHauteur(40,hauteurEcran);
 
-    HandleUpgrades( posX ,  posY ,  marge ,  hauteurEcran ,  echelleX ,  echelleY ,largeurBouton,hauteurBouton  ,inventaire , stats);
-    HandleInventory( posX, posY ,  largeurFenetre,  hauteurFenetre , marge ,  echelleY, echelleX,  textures ,  inventaire);
-    
-    HandleFusion( echelleX, echelleY ,  posX, posY ,  marge ,largeurBouton,hauteurBouton,  largeurFenetre,hauteurEcran, inventaire);
-    HandleDecraft( posX ,  posY ,  hauteurFenetre ,  largeurFenetre ,  marge , echelleX , echelleY, largeurBouton, hauteurBouton);
+    HandleUpgrades( posX ,  posY ,  margeX , margeY,  hauteurEcran , largeurEcran,  largeurBouton ,  hauteurBouton,  inventaire , stats);
+    HandleInventory( posX,  posY ,  margeX, margeY , hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);
+    HandleFusion(posX, posY ,  margeX,  margeY , largeurBouton, hauteurBouton,  hauteurFenetre, largeurFenetre , hauteurEcran, largeurEcran,  inventaire);
+    //HandleDecraft( posX ,  posY ,  hauteurFenetre ,  largeurFenetre ,  marge , largeurBouton, hauteurBouton);
 
 }

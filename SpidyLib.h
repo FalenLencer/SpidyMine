@@ -36,7 +36,8 @@ typedef struct
     int Niveau;
 }Statistiques;
 
-
+float ProportionnelleLargeur(float valeur, int ScreenWidth);
+float ProportionnelleHauteur(float valeur, int ScreenHeight);
 Texture2D LoadTextureIfExists(const char *imagePath);
 int VerifEtat(Bloc B);
 Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[], Texture incassable,Texture evenement, TypeMinerai Types[],int NUM_MINERAIS);
