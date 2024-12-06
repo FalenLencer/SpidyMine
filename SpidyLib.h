@@ -62,6 +62,7 @@ typedef struct {
     Texture2D playerTextureHaut;
     Texture2D playerTextureMove2;
     Texture2D playerTextureMove2g;
+    Texture2D Portail;
 } TexturesJeux;
 
 void InitTextures(TexturesJeux *textures);
@@ -76,7 +77,8 @@ void DetecterCollision(Rectangle Personage, Bloc *Cube);
 bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols , int additionalCols);
 void InitInventaire(Inventaire *inventaire);
 void InitStats(Statistiques *stats);
-void DrawInventaireQuick(Inventaire *inventaire, int HauteurLigne , int TailleCarre);
+void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurEcran);
 void DrawLimite(int rows, int cols, int offsetX, int startY, int TailleCarre, int Espace, int ScreenWidth, Texture2D textureIncassable);
 void CheckOuvertureInventaire(bool *InventaireOuvert);
-void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statistiques *stats);
+void DrawCompleteInventory(int rows, int cols, int additionalCols, int NUM_MINERAIS, bool *IsEnding, TexturesJeux textures, Inventaire *inventaire, Statistiques *stats, Bloc ***Grille);
+void EnableFin();
