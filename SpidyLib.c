@@ -77,6 +77,7 @@ Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[],  T
             }
 
             Grille[i][j].HitBox = (Rectangle){0, 0, 0, 0};
+            Grille[i][j].PeutMiner=false;
         }
     }
 
@@ -147,6 +148,7 @@ void InitInventaire(Inventaire *inventaire) {
     (*inventaire).Mineraie_Niveau_01=0;
     (*inventaire).Mineraie_Niveau_02=0;
     (*inventaire).Mineraie_Niveau_03=0;
+    (*inventaire).Mineraie_Niveau_04=0;
 }
 
 void InitStats(Statistiques *stats) {
@@ -160,6 +162,7 @@ void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurE
     DrawText(TextFormat("Minerai commun : %d",inventaire->Mineraie_Niveau_01), 0,ProportionnelleHauteur(325,hauteurEcran) ,tailleText,GREEN );
     DrawText(TextFormat("Minerai rare : %d",inventaire->Mineraie_Niveau_02), 0,ProportionnelleHauteur(345,hauteurEcran) ,tailleText,BLUE );
     DrawText(TextFormat("Minerai épique : %d",inventaire->Mineraie_Niveau_03), 0,ProportionnelleHauteur(365,hauteurEcran) ,tailleText,PURPLE );
+    DrawText(TextFormat("Minerai Legendaire : %d",inventaire->Mineraie_Niveau_04), 0,ProportionnelleHauteur(385,hauteurEcran) ,tailleText,YELLOW );
 }
 void InitTextures(TexturesJeux *textures) {
     (*textures).Minerai_commun = LoadTextureIfExists("Texture_Blocs/Nut.png");
@@ -177,7 +180,8 @@ void InitTextures(TexturesJeux *textures) {
     (*textures).playerTextureHaut = LoadTextureIfExists("Mouvement_Perso/perso de dos.png");
     (*textures).playerTextureMove2 = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 1.png");
     (*textures).playerTextureMove2g = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 2.png");
-    (*textures).Portail = LoadTextureIfExists("Texture_Blocs/portail.png");
+    (*textures).PortailNewmine = LoadTextureIfExists("Texture_Blocs/portailMine.png");
+    (*textures).PortailFin = LoadTextureIfExists("Texture_Blocs/portailfin.png");
 }
 
 void UnloadTextures(TexturesJeux *textures) {
@@ -196,7 +200,8 @@ void UnloadTextures(TexturesJeux *textures) {
     if ((*textures).playerTextureHaut.id > 0) UnloadTexture((*textures).playerTextureHaut);
     if ((*textures).playerTextureMove2.id > 0) UnloadTexture((*textures).playerTextureMove2);
     if ((*textures).playerTextureMove2g.id > 0) UnloadTexture((*textures).playerTextureMove2g);
-    if ((*textures).Portail.id > 0) UnloadTexture((*textures).Portail);
+    if ((*textures).PortailNewmine.id > 0) UnloadTexture((*textures).PortailNewmine);
+    if ((*textures).PortailFin.id > 0) UnloadTexture((*textures).PortailFin);
 }
 
 bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols, int additionalCols) {
@@ -300,7 +305,7 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
     int oprotunite_epique = rand() % 15;
     if (CheckCollisionPointRec(PosSouris, (*cube).HitBox)) {
         DrawRectangleLinesEx((*cube).HitBox, 2, RED);
-        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && cube->type!=INCASSABLE) {
+        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && cube->type!=INCASSABLE ) {
             (*cube).Etat = true;
             if ((*cube).type == COMMUN){
                 if (oprotunite_commun<stats.Fortune){
@@ -364,12 +369,24 @@ void FusionnerMineraisRare(Inventaire *inventaire) {
         inventaire->Mineraie_Niveau_02 += 1;
     }
 }
-
+void DecraftRare(Inventaire * inventaire){
+    if (inventaire->Mineraie_Niveau_02 >= 1){
+        inventaire->Mineraie_Niveau_02-=1;
+        inventaire->Mineraie_Niveau_01+=5;
+    }
+}
 void FusionnerMineraisEpique(Inventaire *inventaire) {
     if (inventaire->Mineraie_Niveau_01 >= 15 && inventaire->Mineraie_Niveau_02 >= 5) {
         inventaire->Mineraie_Niveau_01 -= 5;
         inventaire->Mineraie_Niveau_02 -= 1;
         inventaire->Mineraie_Niveau_03 += 1;
+    }
+}
+void DecraftEpique(Inventaire * inventaire){
+    if (inventaire->Mineraie_Niveau_03 >= 1){
+        inventaire->Mineraie_Niveau_03-=1;
+        inventaire->Mineraie_Niveau_01 += 5;
+        inventaire->Mineraie_Niveau_02 += 1;
     }
 }
 void FusionnerMineraisLegendaire(Inventaire *inventaire) {
@@ -378,6 +395,14 @@ void FusionnerMineraisLegendaire(Inventaire *inventaire) {
         inventaire->Mineraie_Niveau_02 -= 50;
         inventaire->Mineraie_Niveau_03 -= 25;
         inventaire->Mineraie_Niveau_04 += 1;
+    }
+}
+void DecraftLegendaire(Inventaire * inventaire){
+    if (inventaire->Mineraie_Niveau_04 >= 1){
+        inventaire->Mineraie_Niveau_04-=1;
+        inventaire->Mineraie_Niveau_01 += 100;
+        inventaire->Mineraie_Niveau_02 += 50;
+        inventaire->Mineraie_Niveau_03 += 25;
     }
 }
 void AmeliorerFortune(Inventaire *inventaire, Statistiques *stats,int prix) {
@@ -497,13 +522,13 @@ void HandleDecraftRare(int posX, int posY, int largeurBouton, int hauteurBouton,
         DrawText("Rare", posX + ecartX, posY + (hauteurBouton / 3), TailleText, WHITE);
 
         if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            DecraftRare(inventaire);
         }
     } else {
         DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
         DrawText("Impossible", posX + ecartX, posY +ecartY, TailleText, WHITE);
     }
 }
-
 void HandleDecraftEpique(int posX, int posY, int largeurBouton, int hauteurBouton, int ecartX,int ecartY,int TailleText, Inventaire *inventaire) {
     bool peutdecraftEpique=inventaire->Mineraie_Niveau_03 >= 1;
     if (peutdecraftEpique) {
@@ -511,6 +536,7 @@ void HandleDecraftEpique(int posX, int posY, int largeurBouton, int hauteurBouto
         DrawText("Epique", posX + ecartX, posY + (hauteurBouton / 3), 20, WHITE);
 
         if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            DecraftEpique(inventaire);
         }
     } else {
         DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
@@ -525,6 +551,7 @@ void HandleDecraftLegendaire(int posX, int posY, int largeurBouton, int hauteurB
         DrawRectangle(posX, posY, largeurBouton, hauteurBouton, GOLD);
         DrawText("Legendaire", posX + ecartX, posY + (hauteurBouton / 3), 20, WHITE);
         if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            DecraftLegendaire(inventaire);
         }
     } else {
         DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
@@ -729,9 +756,9 @@ void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY
     int posXBoutonAmelioration = posRectX + margeX;
     int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
 
-    bool peutAmeliorerVitesse = inventaire->Mineraie_Niveau_04 >= prixPortail;
+    bool Peutacheter = inventaire->Mineraie_Niveau_04 >= prixPortail;
 
-    if (peutAmeliorerVitesse) {
+    if (Peutacheter) {
         DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, DARKGREEN);
         DrawText("Acheter", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
 
