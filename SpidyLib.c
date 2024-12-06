@@ -155,10 +155,11 @@ void InitStats(Statistiques *stats) {
     (*stats).Niveau=0;
 }
 
-void DrawInventaireQuick(Inventaire *inventaire, int HauteurLigne , int TailleCarre) {
-    DrawText(TextFormat("Minerai commun : %d",inventaire->Mineraie_Niveau_01), 0,HauteurLigne+40+TailleCarre ,20,GREEN );
-    DrawText(TextFormat("Minerai rare : %d",inventaire->Mineraie_Niveau_02), 0,HauteurLigne+60+TailleCarre ,20,BLUE );
-    DrawText(TextFormat("Minerai épique : %d",inventaire->Mineraie_Niveau_03), 0,HauteurLigne+80+TailleCarre ,20,PURPLE );
+void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurEcran) {
+    int tailleText= ProportionnelleHauteur(20,hauteurEcran);
+    DrawText(TextFormat("Minerai commun : %d",inventaire->Mineraie_Niveau_01), 0,ProportionnelleHauteur(325,hauteurEcran) ,tailleText,GREEN );
+    DrawText(TextFormat("Minerai rare : %d",inventaire->Mineraie_Niveau_02), 0,ProportionnelleHauteur(345,hauteurEcran) ,tailleText,BLUE );
+    DrawText(TextFormat("Minerai épique : %d",inventaire->Mineraie_Niveau_03), 0,ProportionnelleHauteur(365,hauteurEcran) ,tailleText,PURPLE );
 }
 void InitTextures(TexturesJeux *textures) {
     (*textures).Minerai_commun = LoadTextureIfExists("Texture_Blocs/Nut.png");
@@ -176,6 +177,7 @@ void InitTextures(TexturesJeux *textures) {
     (*textures).playerTextureHaut = LoadTextureIfExists("Mouvement_Perso/perso de dos.png");
     (*textures).playerTextureMove2 = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 1.png");
     (*textures).playerTextureMove2g = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 2.png");
+    (*textures).Portail = LoadTextureIfExists("Texture_Blocs/portail.png");
 }
 
 void UnloadTextures(TexturesJeux *textures) {
@@ -194,6 +196,7 @@ void UnloadTextures(TexturesJeux *textures) {
     if ((*textures).playerTextureHaut.id > 0) UnloadTexture((*textures).playerTextureHaut);
     if ((*textures).playerTextureMove2.id > 0) UnloadTexture((*textures).playerTextureMove2);
     if ((*textures).playerTextureMove2g.id > 0) UnloadTexture((*textures).playerTextureMove2g);
+    if ((*textures).Portail.id > 0) UnloadTexture((*textures).Portail);
 }
 
 bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols, int additionalCols) {
@@ -259,7 +262,7 @@ void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isM
             newpos.y= newpos.y-(5*echelle);
             DrawTextureEx(textures.playerTextureAction, newpos, 0.0, echelle, WHITE);
         }else{
-             Vector2 newpos=(playerPosition);
+            Vector2 newpos=(playerPosition);
             newpos.y= newpos.y-(10*echelle);
             DrawTextureEx(textures.playerTextureAction2, newpos, 0.0, echelle, WHITE);
         }
@@ -324,6 +327,9 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
                     inventaire->Mineraie_Niveau_03 = inventaire->Mineraie_Niveau_03+1;
                 }
             }
+        }
+        else if (IsKeyPressed(KEY_T) && cube->type==INCASSABLE){
+            inventaire->Mineraie_Niveau_04+=1;
         }
     }
 }
@@ -482,9 +488,78 @@ void HandleFusion(int posX,int posY , int margeX, int margeY ,int largeurBouton,
 
 }
 
-void HandleDecraft(int posX , int posY , int hauteurFenetre , int largeurFenetre , int marge, int echelleX, int echelleY, int largeurBouton, int hauteurBouton){
+
+void HandleDecraftRare(int posX, int posY, int largeurBouton, int hauteurBouton, int ecartX,int ecartY,int TailleText, Inventaire *inventaire) {
     
+    bool peutdecraftRare=inventaire->Mineraie_Niveau_02 >= 1;
+    if (peutdecraftRare) {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, DARKBLUE);
+        DrawText("Rare", posX + ecartX, posY + (hauteurBouton / 3), TailleText, WHITE);
+
+        if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        }
+    } else {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posX + ecartX, posY +ecartY, TailleText, WHITE);
+    }
 }
+
+void HandleDecraftEpique(int posX, int posY, int largeurBouton, int hauteurBouton, int ecartX,int ecartY,int TailleText, Inventaire *inventaire) {
+    bool peutdecraftEpique=inventaire->Mineraie_Niveau_03 >= 1;
+    if (peutdecraftEpique) {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, PURPLE);
+        DrawText("Epique", posX + ecartX, posY + (hauteurBouton / 3), 20, WHITE);
+
+        if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        }
+    } else {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posX + ecartX, posY +ecartY, TailleText, WHITE);
+    }
+}
+
+void HandleDecraftLegendaire(int posX, int posY, int largeurBouton, int hauteurBouton, int ecartX,int ecartY,int TailleText, Inventaire *inventaire) {
+    
+    bool peutdecraftLegendaire=inventaire->Mineraie_Niveau_04 >= 1;
+    if (peutdecraftLegendaire) {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, GOLD);
+        DrawText("Legendaire", posX + ecartX, posY + (hauteurBouton / 3), 20, WHITE);
+        if (IsMouseOverRectangle(posX, posY, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        }
+    } else {
+        DrawRectangle(posX, posY, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posX + ecartX, posY +ecartY, TailleText, WHITE);
+    }
+
+}
+
+void HandleDecraft(int posX, int posY, int margeX, int margeY,int largeurBouton , int hauteurBouton, int hauteurEcran, int largeurEcran, int hauteurFenetre, int largeurFenetre, TexturesJeux textures, Inventaire *inventaire) {
+    int TailleText = ProportionnelleHauteur(20, hauteurEcran);
+    int posXdecraft = posX;
+    int posYdecraft = posY + hauteurFenetre + margeY;
+    int largeurDecraft = largeurFenetre;
+    int hauteurDecraft = ProportionnelleHauteur(260, hauteurEcran);
+
+    DrawRectangle(posXdecraft, posYdecraft, largeurDecraft, hauteurDecraft, Fade((Color){160, 140, 255, 0}, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posXdecraft, posYdecraft, largeurDecraft, hauteurDecraft}, 2, BLACK);
+    DrawText("Déconstruction de minerais", posXdecraft + margeX, posYdecraft + margeY, TailleText, RAYWHITE);
+    DrawText("Permet de deconstruire son minerais pour recuperer \nses éléments qui le forme.", posXdecraft + margeX, posYdecraft + 4*margeY, TailleText, RAYWHITE);
+
+    int ecartBoutons = ProportionnelleLargeur(100, largeurEcran);
+
+    int posXBoutonDecraftRare = posXdecraft + margeX;
+    int posXBoutonDecraftEpique = posXBoutonDecraftRare + largeurBouton + ecartBoutons;
+    int posXBoutonDecraftLegendaire = posXBoutonDecraftEpique + largeurBouton + ecartBoutons;
+    int posYBoutonDecraft = posYdecraft + hauteurDecraft - hauteurBouton - margeY;
+
+    int ecartX=ProportionnelleLargeur(10,largeurEcran);
+    int ecartY=ProportionnelleHauteur(10,hauteurEcran);
+
+    HandleDecraftRare(posXBoutonDecraftRare, posYBoutonDecraft, largeurBouton, hauteurBouton, ecartX,ecartY,TailleText, inventaire);
+    HandleDecraftEpique(posXBoutonDecraftEpique, posYBoutonDecraft, largeurBouton, hauteurBouton, ecartX,ecartY,TailleText, inventaire);
+    HandleDecraftLegendaire(posXBoutonDecraftLegendaire, posYBoutonDecraft, largeurBouton, hauteurBouton, ecartX,ecartY, TailleText,inventaire);
+}
+
 
 void HandleInventory(int posX, int posY , int margeX,int margeY ,int hauteurEcran , int largeurEcran,int hauteurFenetre,int largeurFenetre , TexturesJeux textures , Inventaire *inventaire){
     int TailleText=ProportionnelleHauteur(20,hauteurEcran);
@@ -522,10 +597,10 @@ void HandleFortune( int hauteurEcran , int largeurEcran,int margeX,int margeY ,i
     DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
 
     DrawText("Fortune :", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
-    DrawText("Augmente les chances des drops de minerais", posRectX + margeX, ProportionnelleHauteur(130,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
+    DrawText("Augmente les chances des drops de minerais", posRectX + margeX, posRectY+ProportionnelleHauteur(70,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
 
     int prixAmelioration = 10;
-    DrawText(TextFormat("Prix : %d minerais rares", prixAmelioration), posRectX + margeX, ProportionnelleHauteur(170,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmelioration), posRectX + margeX, posRectY+ProportionnelleHauteur(110,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
 
     int posXBoutonAmelioration = posRectX + margeX;
     int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
@@ -555,10 +630,10 @@ void HandleVitesseDeplacement( int hauteurEcran , int largeurEcran,int margeX,in
     DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
 
     DrawText("Vitesse :", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
-    DrawText("Augmente la vitesse de déplacement", posRectX + margeX, ProportionnelleHauteur(350,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
+    DrawText("Augmente la vitesse de déplacement", posRectX + margeX, posRectY+ProportionnelleHauteur(70,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
 
     int prixAmeliorationVitesse = 15;
-    DrawText(TextFormat("Prix : %d minerais rares", prixAmeliorationVitesse), posRectX + margeX, ProportionnelleHauteur(390,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
+    DrawText(TextFormat("Prix : %d minerais rares", prixAmeliorationVitesse), posRectX + margeX, posRectY+ProportionnelleHauteur(110,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
 
     int posXBoutonAmelioration = posRectX + margeX;
     int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
@@ -577,23 +652,116 @@ void HandleVitesseDeplacement( int hauteurEcran , int largeurEcran,int margeX,in
         DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
     }
 }
+
+void Changerportail(TexturesJeux textures, Inventaire *inventaire, Bloc ***Grille, int rows, int cols, int additionalCols, int NUM_MINERAIS, int prix) {
+    if (inventaire->Mineraie_Niveau_02 >= prix) {
+        inventaire->Mineraie_Niveau_02 -= prix;
+
+        Texture2D *listeMinerais = malloc(NUM_MINERAIS * sizeof(Texture2D));
+        TypeMinerai *types = malloc(NUM_MINERAIS * sizeof(TypeMinerai));
+
+        for (int i = 0; i < NUM_MINERAIS; ++i) {
+            if (i == 0) {
+                listeMinerais[i] = textures.Minerai_commun;
+                types[i] = COMMUN;
+            } else if (i == 1) {
+                listeMinerais[i] = textures.Minerai_rare;
+                types[i] = RARE;
+            } else if (i == 2) {
+                listeMinerais[i] = textures.Minerai_epique;
+                types[i] = EPIQUE;
+            }
+        }
+
+        FreeGrid(*Grille, rows);
+        *Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable, textures.evenement, types, NUM_MINERAIS);
+
+        free(listeMinerais);
+        free(types);
+    }
+}
+
+
+void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , int rows, int cols ,  int additionalCols ,  int NUM_MINERAIS,Inventaire *inventaire, Statistiques *stats,Bloc ***Grille, TexturesJeux textures){
+    int dimRectX=ProportionnelleLargeur(420,largeurEcran);
+    int dimRectY=ProportionnelleHauteur(200,hauteurEcran);
+    int posRectX=ProportionnelleLargeur(40,largeurEcran);
+    int posRectY=ProportionnelleHauteur(500,hauteurEcran)+margeY;
+    DrawRectangle(posRectX, posRectY, dimRectX, dimRectY, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
+
+    DrawText("Nouveau portail :", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
+    DrawText("Rénitialise la grille actuelle", posRectX + margeX, posRectY+ProportionnelleHauteur(70,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), YELLOW);
+
+    int prixPortail = 10;
+    DrawText(TextFormat("Prix : %d minerais rares", prixPortail), posRectX + margeX, posRectY+ProportionnelleHauteur(110,hauteurEcran), (int)(ProportionnelleLargeur(18,largeurEcran)), WHITE);
+
+    int posXBoutonAmelioration = posRectX + margeX;
+    int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
+
+    bool peutacheterportail = inventaire->Mineraie_Niveau_02 >= prixPortail;
+
+    if (peutacheterportail) {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, DARKGREEN);
+        DrawText("Acheter", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
+
+        if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Changerportail(textures, inventaire, Grille, rows, cols, additionalCols, NUM_MINERAIS, prixPortail);
+
+        }
+    } else {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
+    }
+}
+
+void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , Inventaire *inventaire, Statistiques *stats, bool *IsEnding){
+    int dimRectX=ProportionnelleLargeur(420,largeurEcran);
+    int dimRectY=ProportionnelleHauteur(120,hauteurEcran);
+    int posRectX=ProportionnelleLargeur(40,largeurEcran);
+    int posRectY=ProportionnelleHauteur(720,hauteurEcran)+margeY;
+    DrawRectangle(posRectX, posRectY, dimRectX, dimRectY, Fade(DARKGRAY, 0.8f));
+    DrawRectangleLinesEx((Rectangle){posRectX, posRectY, dimRectX, dimRectY}, 2, BLACK);
+
+    DrawText("????", posRectX+ margeX, posRectY + margeY, Tailletext, RAYWHITE);
+    
+    int prixPortail = 1;
+    int posXBoutonAmelioration = posRectX + margeX;
+    int posYBoutonAmelioration = posRectY + dimRectY - hauteurBouton - margeY;
+
+    bool peutAmeliorerVitesse = inventaire->Mineraie_Niveau_04 >= prixPortail;
+
+    if (peutAmeliorerVitesse) {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, DARKGREEN);
+        DrawText("Acheter", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
+
+        if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            *IsEnding=true;
+        }
+    } else {
+        DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
+        DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
+    }
+}
     
 
 
-void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton, Inventaire *inventaire , Statistiques *stats){
+void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton,int rows,int cols ,int additionalCols , int NUM_MINERAIS, bool *IsEnding ,Inventaire *inventaire , Statistiques *stats,Bloc ***Grille, TexturesJeux textures){
     int dimX=ProportionnelleLargeur(460,largeurEcran);
     int dimY=ProportionnelleHauteur(860,hauteurEcran);
     int tailleText= ProportionnelleHauteur(20,hauteurEcran);
     DrawRectangle(margeX, margeY,dimX , dimY, Fade(DARKBLUE, 0.8f));
     DrawRectangleLinesEx((Rectangle){margeX, margeY, dimX, dimY}, 2, BLACK);
-    DrawText("Améliorations :", (int) (margeX+(dimX/2)-(MeasureText("Améliorations :",tailleText)/2)), margeY + margeY, tailleText, RAYWHITE);
+    DrawText("Boutique :", (int) (margeX+(dimX/2)-(MeasureText("Boutique :",tailleText)/2)), margeY + margeY, tailleText, RAYWHITE);
 
     HandleFortune(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
     HandleVitesseDeplacement( hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
+    HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , rows, cols , additionalCols , NUM_MINERAIS,inventaire, stats,Grille,  textures);
+    HandleLastPortal(hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats , IsEnding);
 }
 
 
-void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statistiques *stats) {
+void DrawCompleteInventory(int rows,int cols , int additionalCols , int NUM_MINERAIS ,bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats,Bloc ***Grille) {
     int largeurEcran = GetScreenWidth();
     int hauteurEcran = GetScreenHeight();
 
@@ -610,9 +778,12 @@ void DrawCompleteInventory(TexturesJeux textures, Inventaire *inventaire, Statis
     int largeurBouton = ProportionnelleLargeur(120,largeurEcran);
     int hauteurBouton = ProportionnelleHauteur(40,hauteurEcran);
 
-    HandleUpgrades( posX ,  posY ,  margeX , margeY,  hauteurEcran , largeurEcran,  largeurBouton ,  hauteurBouton,  inventaire , stats);
+    HandleUpgrades(posX , posY , margeX ,margeY, hauteurEcran ,largeurEcran, largeurBouton , hauteurBouton,rows, cols , additionalCols , NUM_MINERAIS,IsEnding, inventaire ,stats,Grille, textures);
     HandleInventory( posX,  posY ,  margeX, margeY , hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);
     HandleFusion(posX, posY ,  margeX,  margeY , largeurBouton, hauteurBouton,  hauteurFenetre, largeurFenetre , hauteurEcran, largeurEcran,  inventaire);
-    //HandleDecraft( posX ,  posY ,  hauteurFenetre ,  largeurFenetre ,  marge , largeurBouton, hauteurBouton);
+    HandleDecraft(  posX,  posY ,  margeX, margeY ,largeurBouton,hauteurBouton, hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);
 
+}
+
+void EnableFin(){
 }
