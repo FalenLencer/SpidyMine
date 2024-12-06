@@ -44,12 +44,9 @@ int main(void)
     
     float echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
 
-
-    int prevScreenWidth = initialScreenWidth;
-    int prevScreenHeight = initialScreenHeight;
-
     bool ParametreOuvert = false;
     bool InventaireOuvert = false ;
+    bool IsEnding = false ;
     bool fullscreen = false;
 
     bool isMovingRight = false;
@@ -72,11 +69,10 @@ int main(void)
 
 
     Bloc **Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable,textures.evenement, types,NUM_MINERAIS);
-
     while (!WindowShouldClose()){
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
-        
+        /*
         if (ScreenWidth * 9 != ScreenHeight * 16) {
             if (ScreenWidth > ScreenHeight * 16 / 9) {
                 ScreenWidth = ScreenHeight * 16 / 9;
@@ -85,7 +81,7 @@ int main(void)
             }
             SetWindowSize(ScreenWidth, ScreenHeight);
         }
-
+        
         if (prevScreenHeight != ScreenHeight || prevScreenWidth != ScreenWidth){
             float widthScale = (float)ScreenWidth / prevScreenWidth;
             float heightScale = (float)ScreenHeight / prevScreenHeight;
@@ -97,7 +93,7 @@ int main(void)
             
             prevScreenHeight = ScreenHeight;
             prevScreenWidth = ScreenWidth;
-        }
+        }*/
         int TailleBouton = ProportionnelleHauteur(80, ScreenHeight);
         int BoutonMenuWidth = ProportionnelleLargeur(150, ScreenWidth);
         int BoutonMenuHeight = ProportionnelleHauteur(40, ScreenHeight);
@@ -110,7 +106,7 @@ int main(void)
         int startX= (ScreenWidth-((cols+2*additionalCols)*TailleCarre))/2;
         int startY = HauteurLigne + Espace;
 
-        Vector2 PositionBoutonParametre = {ProportionnelleLargeur(1450,ScreenWidth), ProportionnelleHauteur(10, ScreenHeight)};
+        Vector2 PositionBoutonParametre = {ProportionnelleLargeur(1480,ScreenWidth), ProportionnelleHauteur(10, ScreenHeight)};
         Vector2 Pos1600 = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(350,ScreenHeight)};
         Vector2 PosFull = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(400,ScreenHeight)};
         Vector2 PosRevenir = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(450,ScreenHeight) };
@@ -140,14 +136,15 @@ int main(void)
         DrawTextureEx(textures.iconParametreTexture, PositionBoutonParametre,0.0,echelle, WHITE);
 
         if (TailleCarre < 1) TailleCarre = 1;
-        
+
+        Rectangle Personnage={playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle};
         
         if (ParametreOuvert) {
             DrawParametre(ScreenWidth, ScreenHeight, Pos1600, PosFull, PosRevenir, PosQuitter, BoutonMenuWidth, BoutonMenuHeight);
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
         } 
         else if (InventaireOuvert){
-            DrawCompleteInventory(textures,&inventaire,&stats);
+            DrawCompleteInventory(rows,cols , additionalCols , NUM_MINERAIS ,&IsEnding, textures,  &inventaire,&stats,&Grille);
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
         }else {
@@ -165,13 +162,21 @@ int main(void)
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
 
-                    DetecterCollision((Rectangle) {playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle}, &Grille[i][j]);
+                    DetecterCollision(Personnage , &Grille[i][j]);
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }
             }
+            if (IsEnding){
+                DrawTextureEx(textures.Portail,(Vector2){((cols+additionalCols)*TailleCarre)+startX,0},0.0,ProportionnelleHauteur(0.235,ScreenHeight),WHITE);
+                Rectangle Recportail={((cols+additionalCols)*TailleCarre)+startX,0 ,textures.Portail.width*ProportionnelleHauteur(0.235,ScreenHeight),textures.Portail.height*ProportionnelleHauteur(0.235,ScreenHeight)};
+                DrawRectangleLinesEx(Recportail, 2 ,BLUE);
+                if (CheckCollisionRecs(Personnage,Recportail)){
+                    break;
+                }
+            }
             DrawMouvements(isAction, isMovingRight, isMovingLeft, isMovingBas, isMovingHaut, frameCounter, playerPosition, textures, echelle);
-            DrawInventaireQuick(&inventaire, HauteurLigne, TailleCarre);
+            DrawInventaireQuick(&inventaire, ScreenHeight, ScreenWidth);
         }
         EndDrawing();
     }
