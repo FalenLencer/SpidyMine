@@ -168,8 +168,8 @@ int main(void)
                 }
             }
             if (IsEnding){
-                DrawTextureEx(textures.Portail,(Vector2){((cols+additionalCols)*TailleCarre)+startX,0},0.0,ProportionnelleHauteur(0.235,ScreenHeight),WHITE);
-                Rectangle Recportail={((cols+additionalCols)*TailleCarre)+startX,0 ,textures.Portail.width*ProportionnelleHauteur(0.235,ScreenHeight),textures.Portail.height*ProportionnelleHauteur(0.235,ScreenHeight)};
+                DrawTextureEx(textures.PortailFin,(Vector2){((cols+additionalCols)*TailleCarre)+startX,0},0.0,ProportionnelleHauteur(0.235,ScreenHeight),WHITE);
+                Rectangle Recportail={((cols+additionalCols)*TailleCarre)+startX,0 ,textures.PortailFin.width*ProportionnelleHauteur(0.235,ScreenHeight),textures.PortailFin.height*ProportionnelleHauteur(0.235,ScreenHeight)};
                 DrawRectangleLinesEx(Recportail, 2 ,BLUE);
                 if (CheckCollisionRecs(Personnage,Recportail)){
                     break;
