@@ -19,6 +19,7 @@ typedef struct Bloc {
    int PosX;
    int PosY;
    bool Etat;
+   bool PeutMiner;
    TypeMinerai type;
 } Bloc;
 
@@ -62,7 +63,8 @@ typedef struct {
     Texture2D playerTextureHaut;
     Texture2D playerTextureMove2;
     Texture2D playerTextureMove2g;
-    Texture2D Portail;
+    Texture2D PortailNewmine;
+    Texture2D PortailFin;
 } TexturesJeux;
 
 void InitTextures(TexturesJeux *textures);
