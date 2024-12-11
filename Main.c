@@ -69,6 +69,7 @@ int main(void)
 
 
     Bloc **Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable,textures.evenement, types,NUM_MINERAIS);
+
     while (!WindowShouldClose()){
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
@@ -98,10 +99,12 @@ int main(void)
         int BoutonMenuWidth = ProportionnelleLargeur(150, ScreenWidth);
         int BoutonMenuHeight = ProportionnelleHauteur(40, ScreenHeight);
 
-        HauteurLigne = ProportionnelleHauteur(ScreenHeight / 4, ScreenHeight);
+        HauteurLigne = (ScreenHeight / 4);
         TailleCarreWidth = ProportionnelleLargeur(67, ScreenWidth);
         TailleCarreHeight = ProportionnelleHauteur(67, ScreenHeight);
-        TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+        //int TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
+        //int TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+        int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
 
         int startX= (ScreenWidth-((cols+2*additionalCols)*TailleCarre))/2;
         int startY = HauteurLigne + Espace;
@@ -125,7 +128,9 @@ int main(void)
         isMovingBas = false;
         isMovingHaut = false;
 
-        GetMouvements(stats.Vitesse, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, additionalCols, echelle);
+        echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
+
+        GetMouvements(stats.Vitesse, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, &Grille, rows, cols, additionalCols, echelle);
 
         frameCounter++;
 
@@ -158,11 +163,17 @@ int main(void)
                     int x = startX + j * (TailleCarre + Espace);
                     int y = startY + i * (TailleCarre + Espace);
 
-                    DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
+                    if (!Grille[i][j].PeutMiner && Grille[i][j].type!=INCASSABLE)
+                    {
+                       DrawTextureEx(textures.evenement, (Vector2){x, y}, 0.0f, (float)TailleCarre / textures.evenement.width, WHITE);
+                    }
+                    else{
+                        DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
+                    }
 
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
-
-                    DetecterCollision(Personnage , &Grille[i][j]);
+                    
+                    //DetecterCollision(Personnage , &Grille[i][j]);
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }

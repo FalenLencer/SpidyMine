@@ -172,14 +172,17 @@ void InitTextures(TexturesJeux *textures) {
     (*textures).incassable = LoadTextureIfExists("Texture_Blocs/unbreakable.png");
     (*textures).iconParametreTexture = LoadTextureIfExists("parametre.png");
     (*textures).backgroundTexture = LoadTextureIfExists("background.png");
-    (*textures).playerTextureIdle = LoadTextureIfExists("Mouvement_Perso/neutre.png");
-    (*textures).playerTextureMove = LoadTextureIfExists("Mouvement_Perso/bouge 1.png");
-    (*textures).playerTextureMoveD = LoadTextureIfExists("Mouvement_Perso/bouge 2.png");
-    (*textures).playerTextureAction = LoadTextureIfExists("Mouvement_Perso/mine 1.png");
-    (*textures).playerTextureAction2 = LoadTextureIfExists("Mouvement_Perso/mine 2.png");
-    (*textures).playerTextureHaut = LoadTextureIfExists("Mouvement_Perso/perso de dos.png");
-    (*textures).playerTextureMove2 = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 1.png");
-    (*textures).playerTextureMove2g = LoadTextureIfExists("Mouvement_Perso/perso bouge gauche 2.png");
+    (*textures).playerTextureIdle = LoadTextureIfExists("Personnage/Vue_de_face.png");
+    (*textures).playerTextureMoveDroite1 = LoadTextureIfExists("Personnage/marche_droite(1).png");
+    (*textures).playerTextureMoveDroite2 = LoadTextureIfExists("Personnage/marche_droite(2).png");
+    (*textures).playerTextureAction = LoadTextureIfExists("Personnage/Animation_minage/mine_à_droite_(1).png");
+    (*textures).playerTextureAction2 = LoadTextureIfExists("Personnage/Animation_minage/mine_à_droite_(2).png");
+    (*textures).playerTextureHaut = LoadTextureIfExists("Personnage/monté(pied_droit).png");
+    (*textures).playerTextureHaut2 = LoadTextureIfExists("Personnage/monté(pied_gauche).png");
+    (*textures).playerTextureMoveGauche1 = LoadTextureIfExists("Personnage/marche_gauche(1).png");
+    (*textures).playerTextureMoveGauche2 = LoadTextureIfExists("Personnage/marche_gauche(2).png");
+    (*textures).playerTextureBas = LoadTextureIfExists("Personnage/descente(pied_droit).png");
+    (*textures).playerTextureBas2 = LoadTextureIfExists("Personnage/descente(pied_gauche).png");
     (*textures).PortailNewmine = LoadTextureIfExists("Texture_Blocs/portailMine.png");
     (*textures).PortailFin = LoadTextureIfExists("Texture_Blocs/portailfin.png");
 }
@@ -193,30 +196,37 @@ void UnloadTextures(TexturesJeux *textures) {
     if ((*textures).iconParametreTexture.id > 0) UnloadTexture((*textures).iconParametreTexture);
     if ((*textures).backgroundTexture.id > 0) UnloadTexture((*textures).backgroundTexture);
     if ((*textures).playerTextureIdle.id > 0) UnloadTexture((*textures).playerTextureIdle);
-    if ((*textures).playerTextureMove.id > 0) UnloadTexture((*textures).playerTextureMove);
-    if ((*textures).playerTextureMoveD.id > 0) UnloadTexture((*textures).playerTextureMoveD);
+    if ((*textures).playerTextureMoveDroite1.id > 0) UnloadTexture((*textures).playerTextureMoveDroite1);
+    if ((*textures).playerTextureMoveDroite2.id > 0) UnloadTexture((*textures).playerTextureMoveDroite2);
     if ((*textures).playerTextureAction.id > 0) UnloadTexture((*textures).playerTextureAction);
-    if ((*textures).playerTextureMove2.id > 0) UnloadTexture((*textures).playerTextureMove2);
+    if ((*textures).playerTextureAction2.id > 0) UnloadTexture((*textures).playerTextureAction2);
     if ((*textures).playerTextureHaut.id > 0) UnloadTexture((*textures).playerTextureHaut);
-    if ((*textures).playerTextureMove2.id > 0) UnloadTexture((*textures).playerTextureMove2);
-    if ((*textures).playerTextureMove2g.id > 0) UnloadTexture((*textures).playerTextureMove2g);
+    if ((*textures).playerTextureHaut2.id > 0) UnloadTexture((*textures).playerTextureHaut2);
+    if ((*textures).playerTextureMoveGauche1.id > 0) UnloadTexture((*textures).playerTextureMoveGauche1);
+    if ((*textures).playerTextureMoveGauche2.id > 0) UnloadTexture((*textures).playerTextureMoveGauche2);
+    if ((*textures).playerTextureBas.id > 0) UnloadTexture((*textures).playerTextureBas);
+    if ((*textures).playerTextureBas2.id > 0) UnloadTexture((*textures).playerTextureBas2);
     if ((*textures).PortailNewmine.id > 0) UnloadTexture((*textures).PortailNewmine);
     if ((*textures).PortailFin.id > 0) UnloadTexture((*textures).PortailFin);
 }
 
-bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols, int additionalCols) {
+bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols, int additionalCols) {
+    bool colliding=false;
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols+2*additionalCols; j++) {
-            Bloc bloc = Grille[i][j];
-            if (!bloc.Etat && CheckCollisionRecs(personnage, bloc.HitBox)) {
-                return true;
+            if (!(*Grille)[i][j].Etat && CheckCollisionRecs(personnage, (*Grille)[i][j].HitBox)) {
+                (*Grille)[i][j].PeutMiner=true;
+                colliding=true;
+            }
+            else{
+                (*Grille)[i][j].PeutMiner=false;
             }
         }
     }
-    return false;
+    return colliding;
 }
 
-void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc **Grille, int rows, int cols ,int additionalCols , float echelle) {
+void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc ***Grille, int rows, int cols ,int additionalCols , float echelle) {
     Rectangle personnage = (Rectangle) {(*playerPosition).x,(*playerPosition).y,(textures.playerTextureIdle.width)*echelle,(textures.playerTextureIdle.height)*echelle};
     
     if (IsKeyDown(KEY_SPACE)) {
@@ -263,35 +273,39 @@ void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction,
 void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle){
      if (isAction) {
         if ((frameCounter / 15) % 2 == 0) {
-            Vector2 newpos=(playerPosition);
-            newpos.y= newpos.y-(5*echelle);
-            DrawTextureEx(textures.playerTextureAction, newpos, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureAction, playerPosition, 0.0, echelle, WHITE);
         }else{
-            Vector2 newpos=(playerPosition);
-            newpos.y= newpos.y-(10*echelle);
-            DrawTextureEx(textures.playerTextureAction2, newpos, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureAction2, playerPosition, 0.0, echelle, WHITE);
         }
         return;
     }
     if (isMovingRight) {
         if ((frameCounter / 15) % 2 == 0) {
-            DrawTextureEx(textures.playerTextureMove, playerPosition, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureMoveDroite1, playerPosition, 0.0, echelle, WHITE);
         } else {
-            DrawTextureEx(textures.playerTextureMoveD, playerPosition, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureMoveDroite2, playerPosition, 0.0, echelle, WHITE);
         }
     }
     else if (isMovingLeft) {
         if ((frameCounter / 15) % 2 == 0) {
-            DrawTextureEx(textures.playerTextureMove2, playerPosition, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureMoveGauche1, playerPosition, 0.0, echelle, WHITE);
         } else {
-            DrawTextureEx(textures.playerTextureMove2g, playerPosition, 0.0, echelle, WHITE);
+            DrawTextureEx(textures.playerTextureMoveGauche2, playerPosition, 0.0, echelle, WHITE);
         } 
     }
     else if (isMovingBas) {
-        DrawTextureEx(textures.playerTextureIdle, playerPosition, 0.0, echelle, WHITE);
+        if ((frameCounter / 15) % 2 == 0) {
+            DrawTextureEx(textures.playerTextureBas, playerPosition, 0.0, echelle, WHITE);
+        } else {
+            DrawTextureEx(textures.playerTextureBas2, playerPosition, 0.0, echelle, WHITE);
+        } 
     }
     else if (isMovingHaut) {
-        DrawTextureEx(textures.playerTextureHaut, playerPosition, 0.0, echelle, WHITE);
+        if ((frameCounter / 15) % 2 == 0) {
+            DrawTextureEx(textures.playerTextureHaut, playerPosition, 0.0, echelle, WHITE);
+        } else {
+            DrawTextureEx(textures.playerTextureHaut2, playerPosition, 0.0, echelle, WHITE);
+        } 
     }
     else {
         DrawTextureEx(textures.playerTextureIdle, playerPosition, 0.0, echelle, WHITE);
@@ -303,9 +317,9 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
     int oprotunite_commun = rand() % 5;
     int oprotunite_rare = rand() % 10;
     int oprotunite_epique = rand() % 15;
-    if (CheckCollisionPointRec(PosSouris, (*cube).HitBox)) {
+    if (/*CheckCollisionPointRec(PosSouris, (*cube).HitBox)&&*/ cube->PeutMiner && cube->type!=INCASSABLE ) {
         DrawRectangleLinesEx((*cube).HitBox, 2, RED);
-        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && cube->type!=INCASSABLE ) {
+        if (/*IsMouseButtonPressed(MOUSE_BUTTON_LEFT)*/IsKeyDown(KEY_SPACE)  ) {
             (*cube).Etat = true;
             if ((*cube).type == COMMUN){
                 if (oprotunite_commun<stats.Fortune){
@@ -347,7 +361,7 @@ void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *Param
 
 void DetecterCollision(Rectangle Personage, Bloc *Cube){
     DrawRectangleLines(Personage.x,Personage.y,Personage.width,Personage.height,ORANGE);
-    if(CheckCollisionRecs((*Cube).HitBox,Personage)){
+    if(CheckCollisionRecs((*Cube).HitBox,Personage)| Cube->PeutMiner){
         DrawRectangleLinesEx((*Cube).HitBox, 2, BLUE);
     }
 }
@@ -707,7 +721,6 @@ void Changerportail(TexturesJeux textures, Inventaire *inventaire, Bloc ***Grill
         free(types);
     }
 }
-
 
 void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , int rows, int cols ,  int additionalCols ,  int NUM_MINERAIS,Inventaire *inventaire, Statistiques *stats,Bloc ***Grille, TexturesJeux textures){
     int dimRectX=ProportionnelleLargeur(420,largeurEcran);

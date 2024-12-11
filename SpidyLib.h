@@ -56,13 +56,16 @@ typedef struct {
     Texture2D iconParametreTexture;
     Texture2D backgroundTexture;
     Texture2D playerTextureIdle;
-    Texture2D playerTextureMove;
-    Texture2D playerTextureMoveD;
+    Texture2D playerTextureMoveDroite1;
+    Texture2D playerTextureMoveDroite2;
     Texture2D playerTextureAction;
     Texture2D playerTextureAction2;
     Texture2D playerTextureHaut;
-    Texture2D playerTextureMove2;
-    Texture2D playerTextureMove2g;
+    Texture2D playerTextureHaut2;
+    Texture2D playerTextureBas;
+    Texture2D playerTextureBas2;
+    Texture2D playerTextureMoveGauche1;
+    Texture2D playerTextureMoveGauche2;
     Texture2D PortailNewmine;
     Texture2D PortailFin;
 } TexturesJeux;
@@ -70,13 +73,13 @@ typedef struct {
 void InitTextures(TexturesJeux *textures);
 void UnloadTextures(TexturesJeux *textures);
 
-void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc **Grille, int rows, int cols,int additionalCols , float echelle);
+void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc ***Grille, int rows, int cols,int additionalCols , float echelle);
 void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle);
 void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition );
 void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire,Statistiques stats);
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert);
 void DetecterCollision(Rectangle Personage, Bloc *Cube);
-bool IsCollidingWithBloc(Rectangle personnage, Bloc **Grille, int rows, int cols , int additionalCols);
+bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols , int additionalCols);
 void InitInventaire(Inventaire *inventaire);
 void InitStats(Statistiques *stats);
 void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurEcran);
