@@ -30,6 +30,9 @@ typedef struct {
     int Mineraie_Niveau_04;
 } Inventaire;
 
+void InitInventaire(Inventaire *inventaire);
+
+
 typedef struct 
 {
     int Fortune;
@@ -37,15 +40,7 @@ typedef struct
     int Niveau;
 }Statistiques;
 
-float ProportionnelleLargeur(float valeur, int ScreenWidth);
-float ProportionnelleHauteur(float valeur, int ScreenHeight);
-Texture2D LoadTextureIfExists(const char *imagePath);
-int VerifEtat(Bloc B);
-Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[], Texture incassable,Texture evenement, TypeMinerai Types[],int NUM_MINERAIS);
-void FreeGrid(Bloc **Grille, int rows);
-bool CheckMouseCollisionCliked(Vector2 PosSouris, Rectangle Rect);
-void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 PosFull, Vector2 PosRevenir, Vector2 PosQuitter, int BoutonMenuWidth, int BoutonMenuHeight);
-void ChekCollisionParametre(Vector2 PosSouris, Rectangle RetourButtonRect, Rectangle ButtonRect1600, Rectangle FullButtonRect, Rectangle QuitterButtonRect, bool *ParametreOuvert, bool *fullscreen, int *ScreenWidth, int *ScreenHeight);
+void InitStats(Statistiques *stats);
 
 typedef struct {
     Texture2D Minerai_commun;
@@ -70,20 +65,37 @@ typedef struct {
     Texture2D PortailFin;
 } TexturesJeux;
 
+Texture2D LoadTextureIfExists(const char *imagePath);
 void InitTextures(TexturesJeux *textures);
 void UnloadTextures(TexturesJeux *textures);
 
+
+float ProportionnelleLargeur(float valeur, int ScreenWidth);
+float ProportionnelleHauteur(float valeur, int ScreenHeight);
+
+int VerifEtat(Bloc B);
+
+
+Bloc **NeedGrid(int rows, int cols, int additionalCols, Texture2D Minerais[], Texture incassable,Texture evenement, TypeMinerai Types[],int NUM_MINERAIS);
+void FreeGrid(Bloc **Grille, int rows);
+
+
+bool CheckMouseCollisionCliked(Vector2 PosSouris, Rectangle Rect);
+void ChekCollisionParametre(Vector2 PosSouris, Rectangle RetourButtonRect, Rectangle ButtonRect1600, Rectangle FullButtonRect, Rectangle QuitterButtonRect, bool *ParametreOuvert, bool *fullscreen, int *ScreenWidth, int *ScreenHeight);
+void CheckOuvertureInventaire(bool *InventaireOuvert);
+void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert);
+
+
+bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols , int additionalCols);
 void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc ***Grille, int rows, int cols,int additionalCols , float echelle);
 void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isMovingBas,bool isMovingHaut, int frameCounter,Vector2 playerPosition ,TexturesJeux textures, float echelle);
-void ActionMiner(bool isAction ,TexturesJeux textures , Vector2 playerPosition );
-void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire,Statistiques stats);
-void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert);
-void DetecterCollision(Rectangle Personage, Bloc *Cube);
-bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols , int additionalCols);
-void InitInventaire(Inventaire *inventaire);
-void InitStats(Statistiques *stats);
+
+void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 PosFull, Vector2 PosRevenir, Vector2 PosQuitter, int BoutonMenuWidth, int BoutonMenuHeight);
 void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurEcran);
-void DrawLimite(int rows, int cols, int offsetX, int startY, int TailleCarre, int Espace, int ScreenWidth, Texture2D textureIncassable);
-void CheckOuvertureInventaire(bool *InventaireOuvert);
 void DrawCompleteInventory(int rows, int cols, int additionalCols, int NUM_MINERAIS, bool *IsEnding, TexturesJeux textures, Inventaire *inventaire, Statistiques *stats, Bloc ***Grille);
+
+
+void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire,Statistiques stats);
+void DetecterCollision(Rectangle Personage, Bloc *Cube);
+
 void EnableFin();
