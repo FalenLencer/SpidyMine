@@ -6,6 +6,8 @@
 #include "SpidyLib.h"
 #include "CalculLib.h"
 
+int sante = 100; 
+
 int main(void)
 {
     const int initialScreenWidth = 1600;
@@ -25,6 +27,7 @@ int main(void)
     int TailleCarreWidth = (initialScreenWidth - (cols - 1) * Espace) / cols;
     int TailleCarreHeight = (initialScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
     int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+
     int totalWidth = cols * TailleCarre + (cols - 1) * Espace;
     int availableSpace = initialScreenWidth - totalWidth;
     int availableSpacePerSide = availableSpace / 2;
@@ -34,7 +37,7 @@ int main(void)
     Inventaire inventaire;
     InitInventaire(&inventaire);
 
-    TexturesJeux textures;
+    TexturesJeux textures;  
     InitTextures(&textures);
 
     Statistiques stats;
@@ -44,9 +47,15 @@ int main(void)
     
     float echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
 
+
+    int prevScreenWidth = initialScreenWidth;
+    int prevScreenHeight = initialScreenHeight;
+
+    int TailleBouton = 80;
     bool ParametreOuvert = false;
     bool InventaireOuvert = false ;
-    bool IsEnding = false ;
+    int BoutonMenuWidth = 150;
+    int BoutonMenuHeight = 40;
     bool fullscreen = false;
 
     bool isMovingRight = false;
@@ -58,7 +67,6 @@ int main(void)
     int frameCounter = 0;
 
     #define NUM_MINERAIS 3
-    
     Texture2D listeMinerais[NUM_MINERAIS] = {
     textures.Minerai_commun,
     textures.Minerai_rare,
@@ -73,7 +81,7 @@ int main(void)
     while (!WindowShouldClose()){
         int ScreenWidth = GetScreenWidth();
         int ScreenHeight = GetScreenHeight();
-        /*
+        
         if (ScreenWidth * 9 != ScreenHeight * 16) {
             if (ScreenWidth > ScreenHeight * 16 / 9) {
                 ScreenWidth = ScreenHeight * 16 / 9;
@@ -82,7 +90,7 @@ int main(void)
             }
             SetWindowSize(ScreenWidth, ScreenHeight);
         }
-        
+
         if (prevScreenHeight != ScreenHeight || prevScreenWidth != ScreenWidth){
             float widthScale = (float)ScreenWidth / prevScreenWidth;
             float heightScale = (float)ScreenHeight / prevScreenHeight;
@@ -94,26 +102,21 @@ int main(void)
             
             prevScreenHeight = ScreenHeight;
             prevScreenWidth = ScreenWidth;
-        }*/
-        int TailleBouton = ProportionnelleHauteur(80, ScreenHeight);
-        int BoutonMenuWidth = ProportionnelleLargeur(150, ScreenWidth);
-        int BoutonMenuHeight = ProportionnelleHauteur(40, ScreenHeight);
+        }
 
-        HauteurLigne = (ScreenHeight / 4);
-        TailleCarreWidth = ProportionnelleLargeur(67, ScreenWidth);
-        TailleCarreHeight = ProportionnelleHauteur(67, ScreenHeight);
-        //int TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
-        //int TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
-        int TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
+        HauteurLigne = ScreenHeight * 1 / 4;
+        TailleCarreWidth = (ScreenWidth - (cols - 1) * Espace) / cols;
+        TailleCarreHeight = (ScreenHeight - HauteurLigne - (rows - 1) * Espace) / rows;
+        TailleCarre = TailleCarreWidth < TailleCarreHeight ? TailleCarreWidth : TailleCarreHeight;
 
         int startX= (ScreenWidth-((cols+2*additionalCols)*TailleCarre))/2;
         int startY = HauteurLigne + Espace;
 
-        Vector2 PositionBoutonParametre = {ProportionnelleLargeur(1480,ScreenWidth), ProportionnelleHauteur(10, ScreenHeight)};
-        Vector2 Pos1600 = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(350,ScreenHeight)};
-        Vector2 PosFull = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(400,ScreenHeight)};
-        Vector2 PosRevenir = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(450,ScreenHeight) };
-        Vector2 PosQuitter = { ProportionnelleLargeur(725,ScreenWidth), ProportionnelleHauteur(500,ScreenHeight) };
+        Vector2 PositionBoutonParametre = { ScreenWidth - TailleBouton - 10, 10 };
+        Vector2 Pos1600 = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 50 };
+        Vector2 PosFull = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 100 };
+        Vector2 PosRevenir = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 150 };
+        Vector2 PosQuitter = { ((ScreenWidth - 400) / 2) + 125, ((ScreenHeight - 300) / 2) + 200 };
         Vector2 PosSouris = GetMousePosition();
 
         Rectangle ParaRect = { PositionBoutonParametre.x, PositionBoutonParametre.y, TailleBouton, TailleBouton };
@@ -128,28 +131,31 @@ int main(void)
         isMovingBas = false;
         isMovingHaut = false;
 
-        echelle = 1.6*TailleCarre/textures.playerTextureIdle.height;
-
-        GetMouvements(stats.Vitesse, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, &Grille, rows, cols, additionalCols, echelle);
+        GetMouvements(stats.Vitesse, ScreenWidth, ScreenHeight, &isAction, &isMovingRight, &isMovingLeft, &isMovingHaut, &isMovingBas, &playerPosition, textures, Grille, rows, cols, additionalCols, echelle);
 
         frameCounter++;
+
+        if (sante <= 0) {
+            DrawText (" Le personnage est Dead. Game Over",400,300,20,RED);
+        }
 
         BeginDrawing();
         
         ClearBackground(LIGHTGRAY);
 
+        DrawText(TextFormat("Santé:%d",sante),10,10,20,RED);
+
         DrawTextureEx(textures.iconParametreTexture, PositionBoutonParametre,0.0,echelle, WHITE);
 
         if (TailleCarre < 1) TailleCarre = 1;
-
-        Rectangle Personnage={playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle};
+        
         
         if (ParametreOuvert) {
             DrawParametre(ScreenWidth, ScreenHeight, Pos1600, PosFull, PosRevenir, PosQuitter, BoutonMenuWidth, BoutonMenuHeight);
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
         } 
         else if (InventaireOuvert){
-            DrawCompleteInventory(rows,cols , additionalCols , NUM_MINERAIS ,&IsEnding, textures,  &inventaire,&stats,&Grille);
+            DrawCompleteInventory(textures,&inventaire,&stats);
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
         }else {
@@ -160,33 +166,20 @@ int main(void)
                     if (VerifEtat(Grille[i][j])) {
                         continue;
                     }
-                    
                     int x = startX + j * (TailleCarre + Espace);
                     int y = startY + i * (TailleCarre + Espace);
 
-                    if (!Grille[i][j].PeutMiner && Grille[i][j].type!=INCASSABLE)
-                    {
-                       DrawTextureEx(textures.evenement, (Vector2){x, y}, 0.0f, (float)TailleCarre / textures.evenement.width, WHITE);
-                    }
-                    else{
-                        DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
-                    }
-                    
+                    DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
+
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
+
+                    DetecterCollision((Rectangle) {playerPosition.x, playerPosition.y, (textures.playerTextureIdle.width) * echelle, (textures.playerTextureIdle.height) * echelle}, &Grille[i][j]);
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }
             }
-            if (IsEnding){
-                DrawTextureEx(textures.PortailFin,(Vector2){((cols+additionalCols)*TailleCarre)+startX,0},0.0,ProportionnelleHauteur(0.235,ScreenHeight),WHITE);
-                Rectangle Recportail={((cols+additionalCols)*TailleCarre)+startX,0 ,textures.PortailFin.width*ProportionnelleHauteur(0.235,ScreenHeight),textures.PortailFin.height*ProportionnelleHauteur(0.235,ScreenHeight)};
-                DrawRectangleLinesEx(Recportail, 2 ,BLUE);
-                if (CheckCollisionRecs(Personnage,Recportail)){
-                    break;
-                }
-            }
             DrawMouvements(isAction, isMovingRight, isMovingLeft, isMovingBas, isMovingHaut, frameCounter, playerPosition, textures, echelle);
-            DrawInventaireQuick(&inventaire, ScreenHeight, ScreenWidth);
+            DrawInventaireQuick(&inventaire, HauteurLigne, TailleCarre);
         }
         EndDrawing();
     }

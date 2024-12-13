@@ -5,6 +5,9 @@
 #include "SpidyLib.h"
 #include "CalculLib.h"
 
+
+
+
 Texture2D LoadTextureIfExists(const char *imagePath) {
     if (strlen(imagePath) > 0 && FileExists(imagePath)) {
         return LoadTexture(imagePath);
@@ -321,7 +324,10 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
         DrawRectangleLinesEx((*cube).HitBox, 2, RED);
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             (*cube).Etat = true;
-            if ((*cube).type == COMMUN){
+            if ((*cube).type == BLOC_EVENEMENT) {
+                declencherPiege();
+            }
+            if ((*cube).type == COMMUN)
                 if (oprotunite_commun<stats.Fortune){
                     inventaire->Mineraie_Niveau_01 = inventaire->Mineraie_Niveau_01+2;
                 }
@@ -351,7 +357,7 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
     else if (CheckCollisionPointRec(PosSouris, (*cube).HitBox) && IsKeyPressed(KEY_T) && cube->type==INCASSABLE){
             inventaire->Mineraie_Niveau_04+=1;
     }
-}
+
 
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert){
     if (CheckMouseCollisionCliked(PosSouris, ParaRect)) {
@@ -365,7 +371,14 @@ void DetecterCollision(Rectangle Personage, Bloc *Cube){
         DrawRectangleLinesEx((*Cube).HitBox, 2, BLUE);
     }
 }
-
+void declencherPiege() {
+    printf("Un piège s'est déclenché\n");
+    sante -= 20; 
+    if (sante < 0) {
+        sante = 0
+    }
+    printf("santé restante : %d\n", sante);
+}
 void CheckOuvertureInventaire(bool *InventaireOuvert){
     if (IsKeyPressed(KEY_TAB)){
         (*InventaireOuvert)= !(*InventaireOuvert) ;
