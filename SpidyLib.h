@@ -23,6 +23,8 @@ typedef struct Bloc {
    TypeMinerai type;
 } Bloc;
 
+extern int sante; // santé du personnge
+
 typedef struct {
     int Mineraie_Niveau_01;
     int Mineraie_Niveau_02;

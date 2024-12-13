@@ -160,6 +160,7 @@ int main(void)
                     if (VerifEtat(Grille[i][j])) {
                         continue;
                     }
+                    
                     int x = startX + j * (TailleCarre + Espace);
                     int y = startY + i * (TailleCarre + Espace);
 
@@ -170,10 +171,8 @@ int main(void)
                     else{
                         DrawTextureEx(Grille[i][j].Texture, (Vector2){x, y}, 0.0f, (float)TailleCarre / Grille[i][j].Texture.width, WHITE);
                     }
-
-                    Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
                     
-                    //DetecterCollision(Personnage , &Grille[i][j]);
+                    Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }
