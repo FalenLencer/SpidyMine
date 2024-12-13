@@ -5,9 +5,6 @@
 #include "SpidyLib.h"
 #include "CalculLib.h"
 
-
-
-
 Texture2D LoadTextureIfExists(const char *imagePath) {
     if (strlen(imagePath) > 0 && FileExists(imagePath)) {
         return LoadTexture(imagePath);
@@ -98,9 +95,6 @@ void FreeGrid(Bloc **Grille, int rows) {
     free(Grille);
 }
 
-bool CheckMouseCollisionCliked(Vector2 PosSouris, Rectangle Rect) {
-    return (CheckCollisionPointRec(PosSouris, Rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON));
-}
 
 void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 PosFull, Vector2 PosRevenir, Vector2 PosQuitter, int BoutonMenuWidth, int BoutonMenuHeight) {
     DrawRectangle(ProportionnelleLargeur(600,ScreenWidth), ProportionnelleHauteur(300,ScreenHeight), ProportionnelleLargeur(400,ScreenWidth), ProportionnelleHauteur(300,ScreenHeight), GREEN);
@@ -113,6 +107,10 @@ void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 P
     DrawText("Revenir", PosRevenir.x + ProportionnelleLargeur(15,ScreenWidth), PosRevenir.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
     DrawRectangle(PosQuitter.x, PosQuitter.y, BoutonMenuWidth, BoutonMenuHeight, RED);
     DrawText("Quitter", PosQuitter.x + ProportionnelleLargeur(15,ScreenWidth), PosQuitter.y + ProportionnelleHauteur(10,ScreenHeight), 20, RAYWHITE);
+}
+
+bool CheckMouseCollisionCliked(Vector2 PosSouris, Rectangle Rect) {
+    return (CheckCollisionPointRec(PosSouris, Rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON));
 }
 
 void ChekCollisionParametre(Vector2 PosSouris, Rectangle RetourButtonRect, Rectangle ButtonRect1600, Rectangle FullButtonRect, Rectangle QuitterButtonRect, bool *ParametreOuvert, bool *fullscreen, int *ScreenWidth, int *ScreenHeight) {
@@ -165,7 +163,6 @@ void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurE
     DrawText(TextFormat("Minerai commun : %d",inventaire->Mineraie_Niveau_01), 0,ProportionnelleHauteur(325,hauteurEcran) ,tailleText,GREEN );
     DrawText(TextFormat("Minerai rare : %d",inventaire->Mineraie_Niveau_02), 0,ProportionnelleHauteur(345,hauteurEcran) ,tailleText,BLUE );
     DrawText(TextFormat("Minerai épique : %d",inventaire->Mineraie_Niveau_03), 0,ProportionnelleHauteur(365,hauteurEcran) ,tailleText,PURPLE );
-    DrawText(TextFormat("Minerai Legendaire : %d",inventaire->Mineraie_Niveau_04), 0,ProportionnelleHauteur(385,hauteurEcran) ,tailleText,YELLOW );
 }
 void InitTextures(TexturesJeux *textures) {
     (*textures).Minerai_commun = LoadTextureIfExists("Texture_Blocs/Nut.png");
@@ -232,12 +229,12 @@ bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int col
 void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction, bool *isMovingRight, bool *isMovingLeft, bool *isMovingHaut, bool *isMovingBas, Vector2 *playerPosition, TexturesJeux textures, Bloc ***Grille, int rows, int cols ,int additionalCols , float echelle) {
     Rectangle personnage = (Rectangle) {(*playerPosition).x,(*playerPosition).y,(textures.playerTextureIdle.width)*echelle,(textures.playerTextureIdle.height)*echelle};
     
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         *isAction = true;
     } else {
         Vector2 newPosition = *playerPosition;
 
-        if (IsKeyDown(KEY_RIGHT)) {
+        if (IsKeyDown(KEY_D)) {
             newPosition.x += Speed;
             personnage.x = newPosition.x;
             if (newPosition.x <= ScreenWidth - textures.playerTextureIdle.width && !IsCollidingWithBloc(personnage, Grille, rows, cols,additionalCols)) {
@@ -245,7 +242,7 @@ void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction,
                 *isMovingRight = true;
             }
         }
-        if (IsKeyDown(KEY_LEFT)) {
+        if (IsKeyDown(KEY_A)) {
             newPosition.x -= Speed;
             personnage.x = newPosition.x;
             if (newPosition.x >= 0 && !IsCollidingWithBloc(personnage, Grille, rows, cols,additionalCols)) {
@@ -253,7 +250,7 @@ void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction,
                 *isMovingLeft = true;
             }
         }
-        if (IsKeyDown(KEY_UP)) {
+        if (IsKeyDown(KEY_W)) {
             newPosition.y -= Speed;
             personnage.y = newPosition.y;
             if (newPosition.y >= 0 && !IsCollidingWithBloc(personnage, Grille, rows, cols,additionalCols)) {
@@ -261,7 +258,7 @@ void GetMouvements(int Speed, int ScreenWidth, int ScreenHeight, bool *isAction,
                 *isMovingHaut = true;
             }
         }
-        if (IsKeyDown(KEY_DOWN)) {
+        if (IsKeyDown(KEY_S)) {
             newPosition.y += Speed;
             personnage.y = newPosition.y;
             if (newPosition.y + textures.playerTextureIdle.height <= ScreenHeight && !IsCollidingWithBloc(personnage, Grille, rows, cols,additionalCols)) {
@@ -320,14 +317,11 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
     int oprotunite_commun = rand() % 5;
     int oprotunite_rare = rand() % 10;
     int oprotunite_epique = rand() % 15;
-    if (/*CheckCollisionPointRec(PosSouris, (*cube).HitBox)&&*/ cube->PeutMiner && cube->type!=INCASSABLE ) {
+    if (CheckCollisionPointRec(PosSouris, (*cube).HitBox) && cube->PeutMiner && cube->type!=INCASSABLE ) {
         DrawRectangleLinesEx((*cube).HitBox, 2, RED);
-        if (/*IsMouseButtonPressed(MOUSE_BUTTON_LEFT)*/IsKeyDown(KEY_SPACE)  ) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             (*cube).Etat = true;
-            if ((*cube).type == BLOC_EVENEMENT) {
-                declencherPiege();
-            }
-            if ((*cube).type == COMMUN)
+            if ((*cube).type == COMMUN){
                 if (oprotunite_commun<stats.Fortune){
                     inventaire->Mineraie_Niveau_01 = inventaire->Mineraie_Niveau_01+2;
                 }
@@ -353,11 +347,11 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
                 }
             }
         }
-        else if (IsKeyPressed(KEY_T) && cube->type==INCASSABLE){
-            inventaire->Mineraie_Niveau_04+=1;
-        }
     }
-
+    else if (CheckCollisionPointRec(PosSouris, (*cube).HitBox) && IsKeyPressed(KEY_T) && cube->type==INCASSABLE){
+            inventaire->Mineraie_Niveau_04+=1;
+    }
+}
 
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert){
     if (CheckMouseCollisionCliked(PosSouris, ParaRect)) {
@@ -371,14 +365,7 @@ void DetecterCollision(Rectangle Personage, Bloc *Cube){
         DrawRectangleLinesEx((*Cube).HitBox, 2, BLUE);
     }
 }
-void declencherPiege() {
-    printf("Un piège s'est déclenché\n");
-    sante -= 20; 
-    if (sante < 0) {
-        sante = 0
-    }
-    printf("santé restante : %d\n", sante);
-}
+
 void CheckOuvertureInventaire(bool *InventaireOuvert){
     if (IsKeyPressed(KEY_TAB)){
         (*InventaireOuvert)= !(*InventaireOuvert) ;
