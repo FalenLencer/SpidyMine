@@ -722,7 +722,7 @@ void Changerportail(TexturesJeux textures, Inventaire *inventaire, Bloc ***Grill
     }
 }
 
-void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , int rows, int cols ,  int additionalCols ,  int NUM_MINERAIS,Inventaire *inventaire, Statistiques *stats,Bloc ***Grille, TexturesJeux textures){
+void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext,bool *Ischanging , Inventaire *inventaire){
     int dimRectX=ProportionnelleLargeur(420,largeurEcran);
     int dimRectY=ProportionnelleHauteur(200,hauteurEcran);
     int posRectX=ProportionnelleLargeur(40,largeurEcran);
@@ -746,7 +746,7 @@ void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY 
         DrawText("Acheter", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Changerportail(textures, inventaire, Grille, rows, cols, additionalCols, NUM_MINERAIS, prixPortail);
+            *Ischanging=true;
 
         }
     } else {
@@ -786,7 +786,7 @@ void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY
     
 
 
-void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton,int rows,int cols ,int additionalCols , int NUM_MINERAIS, bool *IsEnding ,Inventaire *inventaire , Statistiques *stats,Bloc ***Grille, TexturesJeux textures){
+void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton,bool *Ischanging, bool *IsEnding ,Inventaire *inventaire , Statistiques *stats){
     int dimX=ProportionnelleLargeur(460,largeurEcran);
     int dimY=ProportionnelleHauteur(860,hauteurEcran);
     int tailleText= ProportionnelleHauteur(20,hauteurEcran);
@@ -796,12 +796,12 @@ void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcr
 
     HandleFortune(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
     HandleVitesseDeplacement( hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
-    HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , rows, cols , additionalCols , NUM_MINERAIS,inventaire, stats,Grille,  textures);
+    HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , Ischanging , inventaire);
     HandleLastPortal(hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats , IsEnding);
 }
 
 
-void DrawCompleteInventory(int rows,int cols , int additionalCols , int NUM_MINERAIS ,bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats,Bloc ***Grille) {
+void DrawCompleteInventory(bool *Ischanging, bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats) {
     int largeurEcran = GetScreenWidth();
     int hauteurEcran = GetScreenHeight();
 
@@ -818,7 +818,7 @@ void DrawCompleteInventory(int rows,int cols , int additionalCols , int NUM_MINE
     int largeurBouton = ProportionnelleLargeur(120,largeurEcran);
     int hauteurBouton = ProportionnelleHauteur(40,hauteurEcran);
 
-    HandleUpgrades(posX , posY , margeX ,margeY, hauteurEcran ,largeurEcran, largeurBouton , hauteurBouton,rows, cols , additionalCols , NUM_MINERAIS,IsEnding, inventaire ,stats,Grille, textures);
+    HandleUpgrades(posX , posY , margeX ,margeY, hauteurEcran ,largeurEcran, largeurBouton , hauteurBouton, Ischanging ,IsEnding, inventaire ,stats);
     HandleInventory( posX,  posY ,  margeX, margeY , hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);
     HandleFusion(posX, posY ,  margeX,  margeY , largeurBouton, hauteurBouton,  hauteurFenetre, largeurFenetre , hauteurEcran, largeurEcran,  inventaire);
     HandleDecraft(  posX,  posY ,  margeX, margeY ,largeurBouton,hauteurBouton, hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);

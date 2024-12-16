@@ -46,6 +46,7 @@ int main(void)
 
     bool ParametreOuvert = false;
     bool InventaireOuvert = false ;
+    bool Ischanging = false ;
     bool IsEnding = false ;
     bool fullscreen = false;
 
@@ -149,7 +150,7 @@ int main(void)
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
         } 
         else if (InventaireOuvert){
-            DrawCompleteInventory(rows,cols , additionalCols , NUM_MINERAIS ,&IsEnding, textures,  &inventaire,&stats,&Grille);
+            DrawCompleteInventory(&Ischanging ,&IsEnding , textures,  &inventaire,&stats);
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
         }else {
@@ -175,6 +176,14 @@ int main(void)
                     Grille[i][j].HitBox = (Rectangle){x, y, TailleCarre, TailleCarre};
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
+                }
+            }if (Ischanging){
+                DrawTextureEx(textures.PortailNewmine,(Vector2){startX,0},0.0,ProportionnelleHauteur(5.6,ScreenHeight),WHITE);
+                Rectangle Recportail={startX,0 ,textures.PortailNewmine.width*ProportionnelleHauteur(5.6,ScreenHeight),textures.PortailNewmine.height*ProportionnelleHauteur(5.6,ScreenHeight)};
+                DrawRectangleLinesEx(Recportail, 2 ,BLUE);
+                if (CheckCollisionRecs(Personnage,Recportail)){
+                    Changerportail(textures, &inventaire, &Grille, rows, cols, additionalCols, NUM_MINERAIS, 10);
+                    Ischanging=false;
                 }
             }
             if (IsEnding){

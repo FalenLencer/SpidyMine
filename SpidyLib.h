@@ -63,6 +63,7 @@ typedef struct {
     Texture2D playerTextureMoveGauche2;
     Texture2D PortailNewmine;
     Texture2D PortailFin;
+    Texture2D Screamer;
 } TexturesJeux;
 
 Texture2D LoadTextureIfExists(const char *imagePath);
@@ -92,8 +93,9 @@ void DrawMouvements(bool isAction,bool isMovingRight,bool isMovingLeft ,bool isM
 
 void DrawParametre(int ScreenWidth, int ScreenHeight, Vector2 Pos1600, Vector2 PosFull, Vector2 PosRevenir, Vector2 PosQuitter, int BoutonMenuWidth, int BoutonMenuHeight);
 void DrawInventaireQuick(Inventaire *inventaire, int hauteurEcran , int largeurEcran);
-void DrawCompleteInventory(int rows, int cols, int additionalCols, int NUM_MINERAIS, bool *IsEnding, TexturesJeux textures, Inventaire *inventaire, Statistiques *stats, Bloc ***Grille);
+void DrawCompleteInventory(bool *Ischanging, bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats);
 
+void Changerportail(TexturesJeux textures, Inventaire *inventaire, Bloc ***Grille, int rows, int cols, int additionalCols, int NUM_MINERAIS, int prix);
 
 void SuprCliked(Vector2 PosSouris , Bloc *cube , Inventaire *inventaire,Statistiques stats);
 void DetecterCollision(Rectangle Personage, Bloc *Cube);
