@@ -185,6 +185,8 @@ void InitTextures(TexturesJeux *textures) {
     (*textures).playerTextureBas2 = LoadTextureIfExists("Personnage/descente(pied_gauche).png");
     (*textures).PortailNewmine = LoadTextureIfExists("Texture_Blocs/portailMine.png");
     (*textures).PortailFin = LoadTextureIfExists("Texture_Blocs/portailfin.png");
+    (*textures).Screamer = LoadTextureIfExists("Texture_Blocs/BigSpidy.png");
+    (*textures).Talk = LoadTextureIfExists("Texture_Blocs/LittleSpidy.png");
 }
 
 void UnloadTextures(TexturesJeux *textures) {
@@ -208,6 +210,8 @@ void UnloadTextures(TexturesJeux *textures) {
     if ((*textures).playerTextureBas2.id > 0) UnloadTexture((*textures).playerTextureBas2);
     if ((*textures).PortailNewmine.id > 0) UnloadTexture((*textures).PortailNewmine);
     if ((*textures).PortailFin.id > 0) UnloadTexture((*textures).PortailFin);
+    if ((*textures).Screamer.id > 0) UnloadTexture((*textures).Screamer);
+    if ((*textures).Talk.id > 0) UnloadTexture((*textures).Talk);
 }
 
 bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols, int additionalCols) {
@@ -695,34 +699,31 @@ void HandleVitesseDeplacement( int hauteurEcran , int largeurEcran,int margeX,in
 }
 
 void Changerportail(TexturesJeux textures, Inventaire *inventaire, Bloc ***Grille, int rows, int cols, int additionalCols, int NUM_MINERAIS, int prix) {
-    if (inventaire->Mineraie_Niveau_02 >= prix) {
-        inventaire->Mineraie_Niveau_02 -= prix;
 
-        Texture2D *listeMinerais = malloc(NUM_MINERAIS * sizeof(Texture2D));
-        TypeMinerai *types = malloc(NUM_MINERAIS * sizeof(TypeMinerai));
+    Texture2D *listeMinerais = malloc(NUM_MINERAIS * sizeof(Texture2D));
+    TypeMinerai *types = malloc(NUM_MINERAIS * sizeof(TypeMinerai));
 
-        for (int i = 0; i < NUM_MINERAIS; ++i) {
-            if (i == 0) {
-                listeMinerais[i] = textures.Minerai_commun;
-                types[i] = COMMUN;
-            } else if (i == 1) {
-                listeMinerais[i] = textures.Minerai_rare;
-                types[i] = RARE;
-            } else if (i == 2) {
-                listeMinerais[i] = textures.Minerai_epique;
-                types[i] = EPIQUE;
-            }
+    for (int i = 0; i < NUM_MINERAIS; ++i) {
+        if (i == 0) {
+            listeMinerais[i] = textures.Minerai_commun;
+            types[i] = COMMUN;
+        } else if (i == 1) {
+            listeMinerais[i] = textures.Minerai_rare;
+            types[i] = RARE;
+        } else if (i == 2) {
+            listeMinerais[i] = textures.Minerai_epique;
+            types[i] = EPIQUE;
         }
-
-        FreeGrid(*Grille, rows);
-        *Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable, textures.evenement, types, NUM_MINERAIS);
-
-        free(listeMinerais);
-        free(types);
     }
+
+    FreeGrid(*Grille, rows);
+    *Grille = NeedGrid(rows, cols, additionalCols, listeMinerais, textures.incassable, textures.evenement, types, NUM_MINERAIS);
+
+    free(listeMinerais);
+    free(types);
 }
 
-void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext,bool *Ischanging , Inventaire *inventaire){
+void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext,bool *DessinnerPortail , Inventaire *inventaire){
     int dimRectX=ProportionnelleLargeur(420,largeurEcran);
     int dimRectY=ProportionnelleHauteur(200,hauteurEcran);
     int posRectX=ProportionnelleLargeur(40,largeurEcran);
@@ -746,7 +747,8 @@ void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY 
         DrawText("Acheter", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
 
         if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            *Ischanging=true;
+            *DessinnerPortail=true;
+            inventaire->Mineraie_Niveau_02 -= prixPortail;
 
         }
     } else {
@@ -777,6 +779,7 @@ void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY
 
         if (IsMouseOverRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             *IsEnding=true;
+            inventaire->Mineraie_Niveau_04 -= prixPortail;
         }
     } else {
         DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
@@ -786,7 +789,7 @@ void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY
     
 
 
-void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton,bool *Ischanging, bool *IsEnding ,Inventaire *inventaire , Statistiques *stats){
+void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcran ,int largeurEcran, int largeurBouton , int hauteurBouton,bool *DessinnerPortail, bool *IsEnding ,Inventaire *inventaire , Statistiques *stats){
     int dimX=ProportionnelleLargeur(460,largeurEcran);
     int dimY=ProportionnelleHauteur(860,hauteurEcran);
     int tailleText= ProportionnelleHauteur(20,hauteurEcran);
@@ -796,12 +799,12 @@ void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcr
 
     HandleFortune(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
     HandleVitesseDeplacement( hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
-    HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , Ischanging , inventaire);
+    HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , DessinnerPortail , inventaire);
     HandleLastPortal(hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats , IsEnding);
 }
 
 
-void DrawCompleteInventory(bool *Ischanging, bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats) {
+void DrawCompleteInventory(bool *DessinnerPortail, bool *IsEnding,TexturesJeux textures, Inventaire *inventaire, Statistiques *stats) {
     int largeurEcran = GetScreenWidth();
     int hauteurEcran = GetScreenHeight();
 
@@ -818,7 +821,7 @@ void DrawCompleteInventory(bool *Ischanging, bool *IsEnding,TexturesJeux texture
     int largeurBouton = ProportionnelleLargeur(120,largeurEcran);
     int hauteurBouton = ProportionnelleHauteur(40,hauteurEcran);
 
-    HandleUpgrades(posX , posY , margeX ,margeY, hauteurEcran ,largeurEcran, largeurBouton , hauteurBouton, Ischanging ,IsEnding, inventaire ,stats);
+    HandleUpgrades(posX , posY , margeX ,margeY, hauteurEcran ,largeurEcran, largeurBouton , hauteurBouton, DessinnerPortail ,IsEnding, inventaire ,stats);
     HandleInventory( posX,  posY ,  margeX, margeY , hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);
     HandleFusion(posX, posY ,  margeX,  margeY , largeurBouton, hauteurBouton,  hauteurFenetre, largeurFenetre , hauteurEcran, largeurEcran,  inventaire);
     HandleDecraft(  posX,  posY ,  margeX, margeY ,largeurBouton,hauteurBouton, hauteurEcran ,  largeurEcran, hauteurFenetre, largeurFenetre , textures , inventaire);

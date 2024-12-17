@@ -46,8 +46,10 @@ int main(void)
 
     bool ParametreOuvert = false;
     bool InventaireOuvert = false ;
-    bool Ischanging = false ;
+    bool DessinnerPortail = false ;
+    bool PortailChanger = false ;
     bool IsEnding = false ;
+    bool Fin = false ;
     bool fullscreen = false;
 
     bool isMovingRight = false;
@@ -150,10 +152,15 @@ int main(void)
             ChekCollisionParametre(PosSouris, RetourButtonRect, ButtonRect1600, FullButtonRect, QuitterButtonRect, &ParametreOuvert, &fullscreen, &ScreenWidth, &ScreenHeight);
         } 
         else if (InventaireOuvert){
-            DrawCompleteInventory(&Ischanging ,&IsEnding , textures,  &inventaire,&stats);
+            DrawCompleteInventory(&DessinnerPortail ,&IsEnding , textures,  &inventaire,&stats);
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
-        }else {
+        }else if (Fin){
+            CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
+            ClearBackground(LIGHTGRAY);
+            DrawTextureEx(textures.Screamer,(Vector2) {(ScreenWidth-textures.Screamer.width)/2,0},0.0,1,WHITE);
+        }
+        else {
             CheckOuvertureInventaire(&InventaireOuvert);
             CheckOuvertureParametre(PosSouris, ParaRect, &ParametreOuvert);
             for (int i = 0; i < rows; i++) {
@@ -177,13 +184,16 @@ int main(void)
 
                     SuprCliked(PosSouris, &Grille[i][j], &inventaire, stats);
                 }
-            }if (Ischanging){
+            }if (DessinnerPortail){
                 DrawTextureEx(textures.PortailNewmine,(Vector2){startX,0},0.0,ProportionnelleHauteur(5.6,ScreenHeight),WHITE);
                 Rectangle Recportail={startX,0 ,textures.PortailNewmine.width*ProportionnelleHauteur(5.6,ScreenHeight),textures.PortailNewmine.height*ProportionnelleHauteur(5.6,ScreenHeight)};
-                DrawRectangleLinesEx(Recportail, 2 ,BLUE);
-                if (CheckCollisionRecs(Personnage,Recportail)){
+                if (CheckCollisionCircleRec((Vector2) {Recportail.x+(Recportail.width/2),Recportail.y+(Recportail.height/2)},ProportionnelleHauteur(50,ScreenHeight),Personnage) && !PortailChanger){
                     Changerportail(textures, &inventaire, &Grille, rows, cols, additionalCols, NUM_MINERAIS, 10);
-                    Ischanging=false;
+                    PortailChanger = true ;
+                }
+                else if(!CheckCollisionRecs(Personnage,Recportail) && PortailChanger){
+                    DessinnerPortail=false;
+                    PortailChanger=false;
                 }
             }
             if (IsEnding){
@@ -191,7 +201,7 @@ int main(void)
                 Rectangle Recportail={((cols+additionalCols)*TailleCarre)+startX,0 ,textures.PortailFin.width*ProportionnelleHauteur(0.235,ScreenHeight),textures.PortailFin.height*ProportionnelleHauteur(0.235,ScreenHeight)};
                 DrawRectangleLinesEx(Recportail, 2 ,BLUE);
                 if (CheckCollisionRecs(Personnage,Recportail)){
-                    break;
+                    Fin = true;
                 }
             }
             DrawMouvements(isAction, isMovingRight, isMovingLeft, isMovingBas, isMovingHaut, frameCounter, playerPosition, textures, echelle);
