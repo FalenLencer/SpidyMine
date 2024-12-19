@@ -23,7 +23,7 @@ typedef struct Bloc {
    TypeMinerai type;
 } Bloc;
 
-extern int sante; // santé du personnge
+
 
 typedef struct {
     int Mineraie_Niveau_01;
@@ -65,6 +65,7 @@ typedef struct {
     Texture2D playerTextureMoveGauche2;
     Texture2D PortailNewmine;
     Texture2D PortailFin;
+    Texture2D imageFin;
 } TexturesJeux;
 
 Texture2D LoadTextureIfExists(const char *imagePath);

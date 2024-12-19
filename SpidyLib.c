@@ -188,6 +188,7 @@ void InitTextures(TexturesJeux *textures) {
     (*textures).playerTextureBas2 = LoadTextureIfExists("Personnage/descente(pied_gauche).png");
     (*textures).PortailNewmine = LoadTextureIfExists("Texture_Blocs/portailMine.png");
     (*textures).PortailFin = LoadTextureIfExists("Texture_Blocs/portailfin.png");
+    (*textures).imageFin = LoadTextureIfExists("Last_picture/spidy.jpg");
 }
 
 void UnloadTextures(TexturesJeux *textures) {
@@ -211,6 +212,7 @@ void UnloadTextures(TexturesJeux *textures) {
     if ((*textures).playerTextureBas2.id > 0) UnloadTexture((*textures).playerTextureBas2);
     if ((*textures).PortailNewmine.id > 0) UnloadTexture((*textures).PortailNewmine);
     if ((*textures).PortailFin.id > 0) UnloadTexture((*textures).PortailFin);
+    if ((*textures).imageFin.id > 0) UnloadTexture((*textures).imageFin);
 }
 
 bool IsCollidingWithBloc(Rectangle personnage, Bloc ***Grille, int rows, int cols, int additionalCols) {
@@ -324,10 +326,8 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
         DrawRectangleLinesEx((*cube).HitBox, 2, RED);
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             (*cube).Etat = true;
-            if ((*cube).type == BLOC_EVENEMENT) {
-                declencherPiege();
-            }
-            if ((*cube).type == COMMUN)
+            
+            if ((*cube).type == COMMUN) {
                 if (oprotunite_commun<stats.Fortune){
                     inventaire->Mineraie_Niveau_01 = inventaire->Mineraie_Niveau_01+2;
                 }
@@ -354,11 +354,12 @@ void SuprCliked(Vector2 PosSouris , Bloc *cube ,Inventaire *inventaire,Statistiq
             }
         }
     }
+
     else if (CheckCollisionPointRec(PosSouris, (*cube).HitBox) && IsKeyPressed(KEY_T) && cube->type==INCASSABLE){
             inventaire->Mineraie_Niveau_04+=1;
     }
 
-
+}
 void CheckOuvertureParametre( Vector2 PosSouris, Rectangle ParaRect ,bool *ParametreOuvert){
     if (CheckMouseCollisionCliked(PosSouris, ParaRect)) {
         *ParametreOuvert = true;  
@@ -371,14 +372,7 @@ void DetecterCollision(Rectangle Personage, Bloc *Cube){
         DrawRectangleLinesEx((*Cube).HitBox, 2, BLUE);
     }
 }
-void declencherPiege() {
-    printf("Un piège s'est déclenché\n");
-    sante -= 20; 
-    if (sante < 0) {
-        sante = 0
-    }
-    printf("santé restante : %d\n", sante);
-}
+
 void CheckOuvertureInventaire(bool *InventaireOuvert){
     if (IsKeyPressed(KEY_TAB)){
         (*InventaireOuvert)= !(*InventaireOuvert) ;
@@ -768,7 +762,7 @@ void HandleNewPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY 
     }
 }
 
-void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , Inventaire *inventaire, Statistiques *stats, bool *IsEnding){
+void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY ,int hauteurBouton,int largeurBouton, int Tailletext , Inventaire *inventaire, Statistiques *stats, bool *IsEnding, TexturesJeux textures){
     int dimRectX=ProportionnelleLargeur(420,largeurEcran);
     int dimRectY=ProportionnelleHauteur(120,hauteurEcran);
     int posRectX=ProportionnelleLargeur(40,largeurEcran);
@@ -795,6 +789,13 @@ void HandleLastPortal( int hauteurEcran , int largeurEcran,int margeX,int margeY
         DrawRectangle(posXBoutonAmelioration, posYBoutonAmelioration, largeurBouton, hauteurBouton, RED);
         DrawText("Impossible", posXBoutonAmelioration +ProportionnelleLargeur(10,largeurEcran), posYBoutonAmelioration + ProportionnelleHauteur(10,hauteurEcran), Tailletext, WHITE);
     }
+
+    if (*IsEnding) {
+        Rectangle sourceRec = { 0.0f, 0.0f, (float)textures.imageFin.width, (float)textures.imageFin.height };
+        Rectangle destRec = { 0.0f, 0.0f, (float)largeurEcran, (float)hauteurEcran};
+        Vector2 origin =  { 0.0f, 0.0f };
+        DrawTexturePro(textures.imageFin, sourceRec, destRec, origin, 0.0f, WHITE);
+    }
 }
     
 
@@ -810,7 +811,7 @@ void HandleUpgrades(int posX , int posY , int margeX ,int margeY, int hauteurEcr
     HandleFortune(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
     HandleVitesseDeplacement( hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats);
     HandleNewPortal(  hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton, tailleText , rows, cols , additionalCols , NUM_MINERAIS,inventaire, stats,Grille,  textures);
-    HandleLastPortal(hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats , IsEnding);
+    HandleLastPortal(hauteurEcran ,  largeurEcran, margeX, margeY , hauteurBouton, largeurBouton,  tailleText ,  inventaire,  stats , IsEnding, textures);
 }
 
 

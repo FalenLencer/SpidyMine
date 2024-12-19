@@ -6,7 +6,7 @@
 #include "SpidyLib.h"
 #include "CalculLib.h"
 
-int sante = 100; 
+
 
 int main(void)
 {
@@ -135,15 +135,12 @@ int main(void)
 
         frameCounter++;
 
-        if (sante <= 0) {
-            DrawText (" Le personnage est Dead. Game Over",400,300,20,RED);
-        }
 
         BeginDrawing();
         
         ClearBackground(LIGHTGRAY);
 
-        DrawText(TextFormat("Santé:%d",sante),10,10,20,RED);
+        
 
         DrawTextureEx(textures.iconParametreTexture, PositionBoutonParametre,0.0,echelle, WHITE);
 
